@@ -1,0 +1,113 @@
+
+This README file contains information on how to format, view, and print
+the GLUT and related man pages contained in these subdirectories.
+
+The manual pages in these subdirectories are formatted using the Unix
+standard "man" macros.  You need [tn]roff software or the GNU groff
+software to format these man pages.
+
+The troff software package is one of the oldest computerized text
+formatters still in use.  By historical convention, manual pages on
+Unix systems are formatted with the "man" macro package for [tn]roff.
+nroff is a version of troff that outputs formatted text suitable for
+printing on a terminal or line printer.  Many versions of troff exist.
+Many commercial Unix installations include troff, nroff, or another
+variant such as ditroff or psroff.  Sometimes (as in the case of
+SGI's IRIX) troff support is available as a separate option know as
+"Documenter's Work Bench" (DWB).  GNU groff is an Open Source version
+of troff.  If troff or nroff is not available on your system (for example,
+if you use Linux or Windows), you can use GNU groff to format the manual
+pages included in these subdirectories.
+
+The main web page for information about GNU groff is:
+
+  http://www.gnu.org/software/groff/groff.html
+
+Windows users can use the free WinGROFF software to format these manual
+pages.  A pre-compiled WinGROFF installation can be downloaded from:
+
+  http://www.cs.vu.nl/~tmgil/misc/wingroff.html
+
+Several examples are given below for formatting the .man files in the
+included subdirectories.
+
+Using nroff to format man pages for viewing with a "pager" program for
+easy reading on a terminal:
+
+  nroff -man glut.man | less
+
+If "less" is not available on your system, try "more".
+
+Using groff to format man pages as PostScript for printing to a
+PostScript-compatible printer or viewing using a PostScript viewer such
+as ghostview, xpsview, or gsview32:
+
+  cd man/glut
+  groff -Tps -man glut.man > glut.ps
+
+The resulting "glut.ps" file contains PostScript that can be printed or
+viewed.
+
+You can also generate PostScript for all the GLUT man pages using groff
+like this:
+
+  cd man/glut
+  groff -Tps -rC1 -man *.man > all_glut_man_pages.ps
+
+The "-rC1" flag tells groff to number the pages continuously, rather
+than start each new manual entry at 1.  Add the "-rD1" flag to make
+different odd and even page footers for double-sided printing.
+
+Automatic support for building these man pages in each subdirectory is
+available using either (1) an X11-style Imakefile or (2) an IRIX-specific
+Makefile.sgi for SGI workstations.  The Imakefile approach requires that
+you have working InstallMan imake rules.   The Makefile.sgi requires
+installation of the "dwb" package.  Note that GLUT's "man" subdirectory is
+NOT built automatically by the top-level GLUT Makefile.sgi or Imakefile.
+
+To use the Imakefile, do the following:
+
+ 1)  Edit the top-level Imakefile and add "man" to the SUBDIRS line so
+     that it reads:
+
+       SUBDIRS = lib test progs man
+
+ 2)  Use the top-level "mkmkfiles.imake" script to generate Makefiles
+     for the GLUT distribution.
+
+ 3)  Go into the man directory and do a dry-run make:
+
+        make -n install.man
+
+     The "-n" option shows the commands to be run without actually
+     running them.
+
+ 4)  If you are happy with the results, run "make" again without
+     the "-n" option.
+
+The easiest way to install GLUT man pages on IRIX systems is to
+install the "man" subsystems of the pre-compiled GLUT installable
+images for IRIX.  This way, the GLUT man pages will automatically
+be installed in the correct place.  However if you insist on using
+the Makefile.sgi on IRIX, do the following:
+
+ 1)  Make sure that you have the "dwb" package installed.  DWB
+     ("Documenter's Work Bench") is an optional package that must be
+     separately purchased.  IRIX does not have the "dwb" installed
+     by default.  Check if you have "dwb" by running:
+
+       versions | grep dwb
+
+     If no "dwb" subsystems are displayed, you do not have "dwb".  If you
+     do not have "dwb", you can still use GNU groff as described above.
+
+ 2)  As root, run the command:
+
+       make install
+
+     You may first want to use the "-n" dryrun option to make.
+
+Good luck using the GLUT man pages.
+
+- Mark Kilgard
+  January 9, 2000

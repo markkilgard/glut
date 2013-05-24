@@ -1,0 +1,12 @@
+
+/* Copyright (c) Mark J. Kilgard, 1997, 1998, 2005. */
+
+#define IHaveSubdirs
+#define PassCDebugFlags
+
+#include "../Glut.cf"
+
+SUBDIRS = glut gle
+
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
