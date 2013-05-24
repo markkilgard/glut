@@ -1,0 +1,2097 @@
+
+\sloppy
+
+\section{Initialization}
+
+Routines beginning with the {\tt glutInit}- prefix are used to initialize
+GLUT state.  The primary initialization routine is {\tt glutInit} that
+should only be called exactly once in a GLUT program.  No non-{\tt glutInit}- prefixed
+GLUT or OpenGL routines should be called before {\tt glutInit}.
+
+The other {\tt glutInit}- routines may be called before {\tt glutInit}.
+The reason is these routines can be used to set default window initialization
+state that might be modified by the command processing done in {\tt glutInit}.
+For example, {\tt glutInitWindowSize(400, 400)}\index{glutInitWindowSize}
+can be called before {\tt glutInit}
+to indicate 400 by 400 is the program's default window size.  Though the GLUT
+program can
+still override this default using window size command line options processed by
+{\tt glutInit}.
+
+\subsection{glutInit}
+
+\rndx{glutInit} is used to initialize the GLUT library.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutInit(int *argcp, char **argv);
+\end{verbatim}
+
+\begin{description}
+\itemsep 0in
+\item[\tt argcp] A pointer to the program's
+{\em unmodified} {\tt argc} variable from {\tt main.}
+Upon return, the value pointed to by {\tt argcp}
+will be updated, because {\tt glutInit}
+extracts any command line options intended for the GLUT library.
+
+\item[\tt argv] The program's {\em unmodified} {\tt argv} variable from
+{\tt main.} Like {\tt argcp,} the data for {\tt argv}
+will be updated because {\tt glutInit}
+extracts any command line options understood by the GLUT library.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutInit} will initialize the GLUT library and negotiate a session with the window
+system.  During this process, {\tt glutInit}
+may cause the termination of the GLUT program with an error message to the user if GLUT
+cannot be properly initialized.  Examples of this situation include the failure to
+connect to the window system, the lack of window system support for OpenGL, and invalid
+command line options.
+
+The options parsed are window system dependent.
+
+\subsubsection*{X Implementation Notes}
+
+The X Window System specific options parsed by {\tt glutInit} are as follows:
+\begin{description}
+\item[\tt -display DISPLAY]
+Specify the X server to connect to.  If not specified, the
+value of the {\tt DISPLAY} environment variable is used.
+
+\item[{\tt -geometry} {\em W}{\tt x}{\em H}{\tt +}{\em X}{\tt +}{\em Y}]
+Determines where window's should be created on the screen.  The
+parameter following {\tt -geometry} should be formatted as a standard X geometry specification.
+The effect of using this option is to change the GLUT
+{\em initial size} and {\em initial position} the same as if
+{\tt glutInitWindowSize} or {\tt glutInitWindowPosition}
+were called directly.
+
+\item[\tt -iconic]
+Requests all top-level windows be created in an iconic state.
+
+\item[\tt -indirect]
+Force the use of {\em indirect} OpenGL rendering contexts.
+
+\item[\tt -direct]
+Force the use of {\em direct}
+OpenGL rendering contexts (not all GLX implementations support
+direct rendering contexts).  A fatal error is generated if direct
+rendering is not supported by the OpenGL implementation.
+
+If neither {\tt -indirect} or {\tt -direct} are used to force
+a particular behavior, GLUT will attempt to use direct rendering
+if possible and otherwise fallback to indirect rendering.
+
+\item[\tt -gldebug]
+After processing callbacks and/or events, check if there are any OpenGL
+errors by calling {\tt glGetError}.  If an error is reported, print out
+a warning by looking up the error code with {\tt gluErrorString}.  Using
+this option is helpful in detecting OpenGL run-time errors.
+
+\item[\tt -sync]
+Enable synchronous X protocol behavior.  This option makes it easier
+to track down potential X protocol errors.
+
+\end{description}
+
+\subsection{glutInitWindowPosition, glutInitWindowSize}
+
+\rndx{glutInitWindowPosition} and \rndx{glutInitWindowSize} set the
+{\em initial window position} and {\em size} respectively.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutInitWindowSize(int width, int height);
+void glutInitWindowPosition(int x, int y);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt width]
+Width in pixels.
+\item[\tt height]
+Height in pixels.
+\item[\tt x]
+Window X location in pixels.
+\item[\tt y]
+Window Y location in pixels.
+\end{description}
+
+\subsubsection*{Description}
+
+Windows created by {\tt glutCreateWindow} will be requested to be created
+with the current {\em initial window position} and {\em size}.
+
+The initial value of the {\em initial window position} GLUT state is
+-1 and -1.  If either the X or Y component to the {\em initial
+window position} is negative, the actual window position is left
+to the window system to determine.
+The initial value of the {\em initial window size} GLUT state is 300 by 300.
+The {\em initial window size} components must be greater than zero.
+
+The intent of the {\em initial window position} and {\em size} values is
+to provide a suggestion to the window system for a window's initial size
+and position.  The window system is not obligated to use this information.
+Therefore GLUT programs should not assume the window was created at the
+specified size or position.  A GLUT program should use the window's
+reshape callback to determine the true size of the window.
+
+\subsection{glutInitDisplayMode}
+
+\rndx{glutInitDisplayMode} set the {\em initial display mode}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutInitDisplayMode(GLenum mode);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt mode]
+Display mode, normally the bitwise ORing of GLUT display mode bit masks.
+See values below:
+\end{description}
+\begin{description}
+\itemsep 0in
+\item[\tt GLUT\_RGBA]
+Bit mask to select an RGBA mode window.  This is the default if neither {\tt GLUT\_RGBA}
+nor {\tt GLUT\_INDEX} are specified.
+\item[\tt GLUT\_RGB]
+An alias for {\tt GLUT\_RGBA}.
+\item[\tt GLUT\_INDEX]
+Bit mask to select a color index mode window.  This overrides {\tt GLUT\_RGBA} if it is also
+specified.
+\item[\tt GLUT\_SINGLE]
+Bit mask to select a single buffered window.  This is the default if neither {\tt GLUT\_DOUBLE}
+or {\tt GLUT\_SINGLE} are specified.
+\item[\tt GLUT\_DOUBLE]
+Bit mask to select a double buffered window.  This overrides {\tt GLUT\_SINGLE} if it is also
+specified.
+\item[\tt GLUT\_ACCUM]
+Bit mask to select a window with an accumulation buffer.
+\item[\tt GLUT\_ALPHA]
+Bit mask to select a window with an alpha component to the color buffer(s).
+\item[\tt GLUT\_DEPTH]
+Bit mask to select a window with a depth buffer.
+\item[\tt GLUT\_STENCIL]
+Bit mask to select a window with a stencil buffer.
+\item[\tt GLUT\_MULTISAMPLE]
+Bit mask to select a window with multisampling support.  If multisampling is
+not available, a non-multisampling window will automatically be chosen.
+Note:  both the OpenGL client-side and server-side implementations must support
+the {\tt GLX\_SAMPLE\_SGIS} extension for multisampling to be available.
+\item[\tt GLUT\_STEREO]
+Bit mask to select a stereo window.
+\end{description}
+
+\subsubsection*{Description}
+
+The {\em initial display mode} is used when creating top-level windows and
+subwindows to determine the OpenGL display mode for the to-be-created window.
+
+\section{Beginning Event Processing}
+
+After a GLUT program has done initial setup like creating windows and menus, GLUT
+programs enter the GLUT event processing loop by calling {\tt glutMainLoop()}.
+
+\subsection{glutMainLoop}
+
+\rndx{glutMainLoop} enters the GLUT event processing loop.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutMainLoop(void);
+\end{verbatim}
+ 
+\subsubsection*{Description}
+
+{\tt glutMainLoop} enters the GLUT event processing loop.
+This routine should be called at most once in a GLUT program.  Once called, this routine
+will never return.  It will call as necessary any callbacks that have been registered.
+
+\section{Window Management}
+
+GLUT supports two types of windows:  top-level windows and subwindows.
+Both types support OpenGL rendering and GLUT callbacks.  There is a
+single identifier space for both types of windows.
+
+\subsection{glutCreateWindow}
+
+\rndx{glutCreateWindow} creates a top-level window.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+int glutCreateWindow(char *name);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt name]
+ASCII character string for use as window name.
+\end{description}
+
+\subsubsection*{Description}
+{\tt glutCreateWindow} creates a top-level window.  The {\tt name} will
+be provided to the window system as the window's name.  The intent is that the
+window system will label the window with the name.
+
+Implicitly, the {\em current window} is set to the newly created window.
+
+Each created window has a unique associated OpenGL context.  State changes to
+a window's associated OpenGL context can be done immediately after the
+window is created.
+
+The {\em display state} of a window is initially for the window
+to be shown.  But the window's {\em display state} is not actually
+acted upon until {\tt glutMainLoop} is entered.  This means until {\tt glutMainLoop}
+is called, rendering to a created window is ineffective because the window
+can not yet be displayed.
+
+The value returned is a unique integer identifier for the window.  The
+range of allocated identifiers starts at one.  This window identifier
+can be used when calling {\tt glutSetWindow}.
+
+\subsubsection*{X Notes}
+
+The proper X Inter-Client Communication Conventions Manual
+(ICCCM)\index{X Inter-Client Communication Conventions Manual}
+top-level properties are established.
+The {\tt WM\_COMMAND} property is only established for the first window created.
+
+\subsection{glutCreateSubWindow}
+
+\rndx{glutCreateSubWindow} creates a subwindow of the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+int glutCreateSubWindow(int win,
+                        int x, int y, int width, int height);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt win]
+Identifier of the subwindow's parent window.
+\item[\tt x]
+Window X location in pixels relative to parent window's origin.
+\item[\tt y]
+Window Y location in pixels relative to parent window's origin.
+\item[\tt width]
+Width in pixels.
+\item[\tt height]
+Height in pixels.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutCreateSubWindow} creates a subwindow of the window identified by {\tt win}.
+of size {\tt width} and {\tt height} at location {\tt x} and {\tt y}
+within the {\em current window}.
+Implicitly, the {\em current window} is set to the newly created subwindow.
+
+Each created window has a unique associated OpenGL context.  State changes to
+a window's associated OpenGL context can be done immediately after the
+window is created.
+
+The {\em display state} of a window is initially for the window
+to be shown.  But the window's {\em display state} is not actually
+acted upon until {\tt glutMainLoop} is entered.  This means until {\tt glutMainLoop}
+is called, rendering to a created window is ineffective.
+Subwindows can not be iconified.
+
+Subwindows can be nested arbitrarily deep.
+
+The value returned is a unique integer identifier for the window.  The
+range of allocated identifiers starts at one.
+
+\subsection{glutSetWindow, glutGetWindow}
+
+\rndx{glutSetWindow} sets the {\em current window}; \rndx{glutGetWindow}
+returns the identifier of the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSetWindow(int win);
+int glutGetWindow(void);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt win]
+Identifier of GLUT window to make the {\em current window}.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSetWindow} sets the {\em current window}; {\tt glutGetWindow}
+returns the identifier of the {\em current window}.
+If no windows exist or the previously {\em current window} was destroyed, {\tt glutGetWindow}
+will return zero.
+
+\subsection{glutDestroyWindow}
+
+\rndx{glutDestroyWindow} destroys the specified window.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutDestroyWindow(int win);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt win]
+Identifier of GLUT window to destroy.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutDestroyWindow} destroy the window specified by {\tt win} and the window's
+associated OpenGL context and logical colormap (if the window is color index).  If {\tt win} was
+the {\em current window}, the {\em current window} becomes
+invalid ({\tt glutGetWindow} will return zero).
+
+\subsection{glutPostRedisplay}
+
+\rndx{glutPostRedisplay} marks the {\em current window} as needing to be redisplayed.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutPostRedisplay(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+Mark the {\em current window} as needing to be redisplayed.  The next time
+through {\tt glutMainLoop}, the window's display callback will be called
+to redisplay the window.  Multiple calls to {\tt glutPostRedisplay}
+before the next display callback opportunity generates only a single
+redisplay.  {\tt glutPostRedisplay} maybe be called within a window's
+display callback to re-mark that window for redisplay.
+
+Logically, window damage notification for a window is treated as a
+{\tt glutPostRedisplay} on the damaged window.
+
+\subsection{glutSwapBuffers}
+
+\rndx{glutSwapBuffers} swaps the buffers of the {\em current window} if double buffered.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSwapBuffers(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+Performs a buffer swap on the {\em current window}.  Specifically, {\tt glutSwapBuffers}
+promotes the contents of the back buffer of the {\em current window} to become the
+contents of the front buffer.  The contents of the back buffer then
+become undefined.  The update typically takes place during the vertical
+retrace of the monitor, rather than immediately after {\tt glutSwapBuffers}
+is called.
+
+An implicit {\tt glFlush} is done by {\tt glutSwapBuffers} before it returns.
+Subsequent OpenGL commands can be issued immediately after calling
+{\tt glutSwapBuffers}, but are not executed until the buffer exchange
+is completed.
+
+If the window is not
+double buffered, {\tt glutSwapBuffers} has no effect.
+
+\subsection{glutPositionWindow}
+
+\rndx{glutPositionWindow} requests a change to the position of
+the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutPositionWindow(int x, int y);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt x]
+New X location of window in pixels.
+\item[\tt y]
+New Y location of window in pixels.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutPositionWindow} requests a change in the position of
+the {\em current window}.
+For top-level windows, the {\tt x} and {\tt y} parameters are
+pixel offsets from the screen origin.  For subwindows, the
+{\tt x} and {\tt y} parameters are pixel offsets from the window's
+parent window origin.
+
+The {\tt glutPositionWindow} requests are not processed immediately.
+The request is executed after returning to the main event loop.
+This allows multiple {\tt glutPositionWindow} and {\tt glutReshapeWindow}
+requests to the same window to be coalesced.
+
+In the case of top-level windows, a {\tt glutPositionWindow} call
+is considered only a request for positioning the window.
+The window system is free to apply its own policies to top-level
+window placement.  The intent is that top-level windows
+should be repositioned according {\tt glutPositionWindow}'s parameters.
+
+\subsection{glutReshapeWindow}
+
+\rndx{glutReshapeWindow} requests a change to the size of
+the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutReshapeWindow(int width, int height);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt width]
+New width of window in pixels.
+\item[\tt height]
+New height of window in pixels.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutReshapeWindow} requests a change in the size of
+the {\em current window}.
+The {\tt width} and {\tt height} parameters are
+size extents in pixels.
+
+The {\tt glutReshapeWindow} requests are not processed immediately.
+The request is executed after returning to the main event loop.
+This allows multiple {\tt glutReshapeWindow} and {\tt glutPositionWindow}
+requests to the same window to be coalesced.
+
+In the case of top-level windows, a {\tt glutReshapeWindow} call
+is considered only a request for sizing the window.
+The window system is free to apply its own policies to top-level
+window sizing.  The intent is that top-level windows
+should be reshaped according {\tt glutReshapeWindow}'s parameters.
+
+\subsection{glutPopWindow, glutPushWindow}
+
+\rndx{glutPopWindow} and \rndx{glutPushWindow} change the stacking order
+of the {\em current window} relative to its siblings.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutPopWindow(void);
+void glutPushWindow(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+{\tt glutPopWindow} and {\tt glutPushWindow} work on both top-level
+windows and sub-windows.  The effect of pushing and popping windows
+does not take place immediately.  Instead the push or pop is saved
+for execution upon return to the GLUT event loop.  Subsequent
+push or pop requests on a window replace the previously saved
+request for that window.  The effect of pushing and popping
+top-level windows is subject to the window system's policy for
+restacking windows.
+
+\subsection{glutShowWindow, glutHideWindow, glutIconifyWindow}
+
+\rndx{glutShowWindow}, \rndx{glutHideWindow}, and \rndx{glutIconifyWindow}
+change the display status of the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutShowWindow(void);
+void glutHideWindow(void);
+void glutIconifyWindow(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+{\tt glutShowWindow} will show the {\em current window} (though
+it may still not be visible).  {\tt glutHideWindow} will hide
+the {\em current window}.  {\tt glutIconifyWindow} will iconify
+a top-level window but GLUT prohibits iconification of a sub-window.
+The effect of showing, hiding, and iconifying windows does not
+take place immediately.  Instead the requests are saved
+for execution upon return to the GLUT event loop.
+Subsequent show, hide, or iconification requests on a window
+replace the previously saved request for that window.  The effect of hiding,
+showing, or iconifying top-level windows is subject to the window
+system's policy for displaying windows.
+
+\subsection{glutSetWindowTitle, glutSetIconTitle}
+
+\rndx{glutSetWindowTitle} and \rndx{glutSetIconTitle} change
+the window or icon title respectively of the current top-level window.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSetWindowTitle(char *name);
+void glutSetIconTitle(char *name);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt name]
+ASCII character string for the window or icon name to be set for the window.
+\end{description}
+
+\subsubsection*{Description}
+
+These routines should only be called when the {\em current window}
+is a top-level window.  Upon creation of a top-level window,
+the window and icon names are determined by the {\tt name}
+parameter to {\tt glutCreateWindow}.  Once created, {\tt glutSetWindowTitle}
+and {\tt glutSetIconTitle} can change the window and icon names
+respectively of top-level windows.  Each call requests the
+window system change the title appropriately.  The policy by which
+the window and icon name are displayed is window system dependent.
+
+\section{Menu Management}
+
+GLUT supports cascading pop-up menus.
+
+It is illegal to create or destroy menus or change, add, or remove menu items while a
+menu (and any cascaded sub-menus) are in use (i.e., popped up).
+
+\subsection{glutCreateMenu}
+
+\rndx{glutCreateMenu} creates a new pop-up menu.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+int glutCreateMenu(void (*func)(int value));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The callback function for the menu that is called when a menu
+entry from the menu is selected.  The value passed to the callback
+is determined by the value for the selected menu entry.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutCreateMenu} creates a new pop-up menu and returns a unique small-integer
+identifier.  The menu identifier range is separate from the window identifier range
+so menu and window identifiers are not distinct.
+Implicitly, the {\em current menu} is set to the newly created menu.
+
+When the menu callback is called because a menu entry is selected for
+the menu, the {\em current menu} will be implicitly set to the menu
+with the selected entry before the callback is made.
+
+\subsubsection*{X Implementation Notes}
+
+If available, GLUT for X will take advantage of overlay planes
+for implementing pop-up menus.  The use of overlay planes can
+eliminate display callbacks when pop-up menus are deactivated.
+The {\tt SERVER\_OVERLAY\_VISUALS} convention \cite{kilgard93} is used to
+determine if overlay visuals are available.
+
+\subsection{glutSetMenu, glutGetMenu}
+
+\rndx{glutSetMenu} sets the {\em current menu}; \rndx{glutGetMenu} returns the
+identifier of the {\em current menu}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutSetMenu(int menu);
+int glutGetMenu(void);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt menu]
+The identifier of the menu to make the {\em current menu}.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSetMenu} sets the {\em current menu}; {\tt glutGetMenu} returns the
+identifier of the {\em current menu}.
+If no menus exist or the previously {\em current menu} was destroyed,
+{\tt glutGetMenu} returns zero.
+
+\subsection{glutDestroyMenu}
+
+\rndx{glutDestroyMenu} destroys the specified menu.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutDestroyMenu(int menu);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt menu]
+The identifier of the menu to destroy.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutDestroyMenu} destroys the specified menu by {\tt menu}.  If {\tt menu}
+was the {\em current menu}, the {\em current menu} becomes invalid and
+{\tt glutGetMenu} will return zero.
+
+\subsection{glutAddMenuEntry}
+
+\rndx{glutAddMenuEntry} adds a menu entry to the bottom of the {\em current menu}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutAddMenuEntry(char *name, int value);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt name]
+ASCII character string to display in the menu entry.
+\item[\tt value]
+Value to return to the menu's callback function if the menu entry is selected.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutAddMenuEntry} adds a menu entry to the bottom of the {\em current menu}.
+The string {\tt name} will be displayed for the newly added menu entry.
+If the menu entry is selected by the user, the menu's callback will be called
+passing {\tt value} as the callback's parameter.
+
+\subsection{glutAddSubMenu}
+
+\rndx{glutAddSubMenu} adds a sub-menu trigger to the bottom of the {\em current menu}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutAddSubMenu(char *name, int menu);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt name]
+ASCII character string to display in the menu item from which to cascade the sub-menu.
+\item[\tt menu]
+Identifier of the menu to cascade from this sub-menu menu item.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutAddSubMenu} adds a sub-menu trigger to the bottom of the {\em current menu}.
+The string {\tt name} will be displayed for the newly added sub-menu trigger.
+If the sub-menu trigger is entered, the sub-menu numbered {\tt menu} will
+be cascaded, allowing sub-menu menu items to be selected.
+
+\subsection{glutChangeToMenuEntry}
+
+\rndx{glutChangeToMenuEntry} changes the specified menu item in the {\em current
+menu} into a menu entry.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutChangeToMenuEntry(int entry, char *name, int value);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt entry]
+Index into the menu items of the {\em current menu} (1 is the topmost
+menu item).
+\item[\tt name]
+ASCII character string to display in the menu entry.
+\item[\tt value]
+Value to return to the menu's callback function if the menu entry is selected.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutChangeToMenuEntry} changes the specified menu entry in the {\em current
+menu} into a menu entry.  The {\tt entry} parameter determines which menu
+item should be changed, with one being the topmost item.  
+{\tt entry} must be between 1 and {\tt glutGet(GLUT\_MENU\_NUM\_ITEMS)}
+inclusive.
+The menu item to
+change does not have to be a menu entry already.  The string {\tt name}
+will be displayed for the newly changed menu entry.  The {\tt value}
+will be returned to the menu's callback if this menu entry is selected.
+
+\subsection{glutChangeToSubMenu}
+
+\rndx{glutChangeToSubMenu} changes the specified menu item in the {\em
+current menu} into a sub-menu trigger.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutChangeToSubMenu(int entry, char *name, int menu);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt entry]
+Index into the menu items of the {\em current menu} (1 is the topmost
+menu item).
+\item[\tt name]
+ASCII character string to display in the menu item to cascade the sub-menu from.
+\item[\tt menu]
+Identifier of the menu to cascade from this sub-menu menu item.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutChangeToSubMenu} changes the specified menu item in the {\em
+current menu} into a sub-menu trigger.  The {\tt entry} parameter
+determines which menu item should be changed, with one being the
+topmost item.  
+{\tt entry} must be between 1 and {\tt glutGet(GLUT\_MENU\_NUM\_ITEMS)}
+inclusive.
+The menu item to change does not have to be a sub-menu
+trigger already.  The string {\tt name}
+will be displayed for the newly changed sub-menu trigger.
+The {\tt menu} identifier names the sub-menu to cascade from the
+newly added sub-menu trigger.
+
+\subsection{glutRemoveMenuItem}
+
+\rndx{glutRemoveMenuItem} remove the specified menu item.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutRemoveMenuItem(int entry);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt entry]
+Index into the menu items of the {\em current menu} (1 is the topmost
+menu item).
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutRemoveMenuItem} remove the {\tt entry} menu item regardless of whether it
+is a menu entry or sub-menu trigger.
+{\tt entry} must be between 1 and {\tt glutGet(GLUT\_MENU\_NUM\_ITEMS)}
+inclusive.
+Menu items below the removed menu item are renumbered.
+
+\subsection{glutAttachMenu, glutDetachMenu}
+
+\rndx{glutAttachMenu} attaches a mouse button for the {\em current window} to the identifier of
+the {\em current menu}; {\tt glutDetachMenu} detaches an attached mouse button from the
+{\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutAttachMenu(int button);
+void glutDetachMenu(int button);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt button]
+The button to attach a menu or detach a menu.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutAttachMenu} attaches a mouse button for the {\em current window} to the identifier of
+the {\em current menu}; {\tt glutDetachMenu} detaches an attached mouse button from the
+{\em current window}.  By attaching a menu identifier to a button, the named menu
+will be popped up when the user presses the specified button.
+{\tt button} should be one of {\tt GLUT\_LEFT\_BUTTON}, {\tt GLUT\_MIDDLE\_BUTTON},
+and {\tt GLUT\_RIGHT\_BUTTON}.  Note that the menu is attached to the button by
+identifier, not by reference.
+
+\section{Callback Registration}
+
+GLUT supports a number of callbacks to respond to events.  There are
+three types of callbacks:  window, menu, and global.   Window callbacks
+indicate when to redisplay or reshape a window, when the visibility of
+the window changes, and when input is available for the window.
+The menu callback is set by the {\tt glutCreateMenu} call described already.
+The global callbacks manage the passing of time and menu usage.
+The calling order of callbacks between different windows is undefined.
+
+\subsubsection*{X Notes}
+
+The X GLUT implementation uses the X Input extension \cite{xinput-lib,xinput-protocol}
+to support sophisticated input devices:  Spaceball, dial \& button box,
+and digitizing tablet.  Because the X Input extension\index{X Input Extension} does not
+mandate how particular types of devices are advertised through
+the extension, it is possible the X GLUT implementation may not
+correctly support input devices that would otherwise be of the
+correct type.  The X GLUT implementation will support the Silicon
+Graphics Spaceball, dial \& button box, and digitizing tablet as
+advertised through the X Input extension.
+Refer to the X implementation itself for details.
+
+\subsection{glutDisplayFunc}
+
+\rndx{glutDisplayFunc} sets the display callback for the {\em current window}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutDisplayFunc(void (*func)(void));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new display callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutDisplayFunc} sets the display callback for the {\em current window}.
+When GLUT determines that a window needs to be redisplayed, the display callback for the window
+is called.  Before the callback, the {\em current window} is
+set to the window needing to be redisplayed.  The display callback is
+called with no parameters.  The entire window should be redisplayed
+in response to the callback.
+
+The redisplay state of a window is set.  Multiple posted redisplays
+for a window are coalesced by GLUT to minimize the number of display
+callbacks called.
+
+Initially when a window is created, no display callback exists for
+the window.  If a redisplay is posted for the window, it will simply
+be discarded.  It is the responsibility of the programmer to install
+a display callback for the window before the window is shown.  Passing {\tt NULL} to
+{\tt glutDisplayFunc} will deregister the existing display callback.
+
+\subsection{glutReshapeFunc}
+
+\rndx{glutReshapeFunc} sets the reshape callback for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutReshapeFunc(void (*func)(int width, int height));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new reshape callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutReshapeFunc} sets the reshape callback for the {\em current window}.
+The reshape callback is triggered when a window is reshaped.
+A reshape callback is also triggered immediately before the first display callback
+for a window is triggered {\em if} a reshape has not previously been triggered for the window.
+The {\tt width} and {\tt height} parameters of the callback
+specify the new window size in pixels.  Before the callback, the {\em current
+window} is set to the window that has been reshaped.
+
+If a reshape callback is not registered for a window or {\tt NULL} is
+passed to {\tt glutReshapeFunc} to deregister a previously registered
+callback, the default reshape callback is used.  This default callback
+will simply call {\tt glViewport(0,0,width,height)}.
+
+When a top-level window is reshaped, subwindows are not reshaped.  It is
+up to the GLUT program to manage the size and positions of subwindows
+within a top-level window.  Still, reshape callbacks will be called for
+sub-windows when their size is changed using {\tt glutReshapeWindow}.
+
+\subsection{glutKeyboardFunc}
+
+\rndx{glutKeyboardFunc} sets the keyboard callback for the {\em current window}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutKeyboardFunc(void (*func)(unsigned char key,
+                                   int x, int y));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new keyboard callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutKeyboardFunc} sets the keyboard callback for the {\em current window}.
+When a user types into the window, each key press generating an ASCII character
+will generate a keyboard callback.  The {\tt key} callback parameter is the 
+generated ASCII character.  The state of modifier keys such as Shift cannot be
+determined directly; their only effect will be on the returned ASCII data.
+The {\tt x} and {\tt y} callback
+parameters indicate the mouse location in window relative coordinates
+when the key was pressed.  When a new window is created, no keyboard
+callback is initially registered and ASCII key strokes in the window are
+ignored.  
+Passing {\tt NULL} to {\tt glutKeyboardFunc} disables
+the generation of keyboard callbacks.
+
+See {\tt glutSpecialFunc} for a means to detect non-ASCII key strokes.
+
+\subsection{glutMouseFunc}
+
+\rndx{glutMouseFunc} sets the mouse callback for the {\em current window}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+void glutMouseFunc(void (*func)(int button, int state,
+                                int x, int y));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new mouse callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutMouseFunc} sets the mouse callback for the {\em current window}.
+When a user presses and releases mouse buttons in the window, each press
+and each release generates a mouse callback.  The {\tt button} parameter
+is one of {\tt GLUT\_LEFT\_BUTTON}, {\tt GLUT\_MIDDLE\_BUTTON}, or
+{\tt GLUT\_RIGHT\_BUTTON}.  For systems with only two mouse buttons, it may
+not be possible to generate {\tt GLUT\_MIDDLE\_BUTTON} callback.  For systems
+with a single mouse button, it may only be possible to generate a
+{\tt GLUT\_LEFT\_BUTTON} callback.  The {\tt state} parameter is either
+{\tt GLUT\_UP} or {\tt GLUT\_DOWN} indicating whether the callback
+was due to a release or press respectively.  The {\tt x} and {\tt y} callback
+parameters indicate the window relative coordinates when the mouse
+button state changed.  If a {\tt GLUT\_DOWN} callback for a specific
+button is triggered, the program can assume a {\tt GLUT\_UP} callback for the 
+same button will be generated (assuming the window still has a mouse
+callback registered) when the mouse button is released even if
+the mouse has moved outside the window.
+
+If a menu is attached to a button for a window, mouse callbacks will
+not be generated for that button.
+
+Passing {\tt NULL} to {\tt glutMouseFunc} disables
+the generation of mouse callbacks.
+
+\subsection{glutMotionFunc, glutPassiveMotionFunc}
+
+\rndx{glutMotionFunc} and {\tt glutPassiveMotionFunc} set the motion and
+passive motion callback respectively for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutMotionFunc(void (*func)(int x, int y));
+void glutPassiveMotionFunc(void (*func)(int x, int y));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new motion or passive motion callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutMotionFunc} and {\tt glutPassiveMotionFunc} set the motion and
+passive motion callback respectively for the {\em current window}.
+The motion callback for a window is called when the mouse moves
+within the window while one or more mouse buttons are pressed.  The
+passive motion callback for a window is called when the mouse moves
+within the window while {\em no} mouse buttons are pressed.
+
+The {\tt x} and {\tt y} callback parameters indicate the mouse location
+in window relative coordinates.
+
+Passing {\tt NULL} to {\tt glutMotionFunc} or {\tt glutPassiveMotionFunc}
+disables the generation of the mouse or passive motion callback
+respectively.
+
+\subsection{glutVisibilityFunc}
+
+\rndx{glutVisibilityFunc} sets the visibility callback for the {\em
+current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutVisibilityFunc(void (*func)(int state));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new visibility callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutVisibilityFunc} sets the visibility callback for the {\em
+current window}.  The visibility callback for a window is called when
+the visibility of a window changes.  The {\tt state} callback parameter
+is either {\tt GLUT\_NOT\_VISIBLE} or {\tt GLUT\_VISIBLE} depending on
+the current visibility of the window.  {\tt GLUT\_VISIBLE} does not
+distinguish a window being totally versus partially visible.  {\tt GLUT\_NOT\_VISIBLE}
+means no part of the window is visible, ie. until the window's visibility changes,
+further rendering to the window is discarded.
+
+Passing {\tt NULL} to {\tt glutVisibilityFunc}
+disables the generation of the visibility callback.
+
+If the visibility callback for a window is
+disabled and later reenabled, the visibility status of the window is
+undefined; any change in window visibility will be reported, that is
+if you disable a visibility callback and reenable the callback, you
+are guaranteed the next visibility change will be reported.
+
+\subsection{glutEntryFunc}
+
+\rndx{glutEntryFunc} sets the mouse enter/leave callback for the {\em
+current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutEntryFunc(void (*func)(int state));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutEntryFunc} sets the mouse enter/leave callback for the {\em
+current window}.  The {\tt state} callback parameter is either {\tt
+GLUT\_LEFT} or {\tt GLUT\_ENTERED} depending on if the mouse pointer
+has last left or entered the window.
+
+Passing {\tt NULL} to {\tt glutEntryFunc}
+disables the generation of the mouse enter/leave callback.
+
+Some window systems may not generate accurate enter/leave callbacks.
+
+\subsubsection*{X Notes}
+
+An X implementation of GLUT should generate accurate enter/leave callbacks.
+
+\subsection{glutSpecialFunc}
+
+\rndx{glutSpecialFunc} sets the special keyboard callback for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSpecialFunc(void (*func)(int key, int x, int y));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSpecialFunc} sets the special keyboard callback for the {\em current
+window}.  The special keyboard callback is triggered when keyboard
+function or directional keys are pressed.  The {\tt key} callback parameter
+is a {\tt GLUT\_KEY\_}* constant for the special key pressed. 
+The {\tt x} and {\tt y} callback parameters indicate the mouse in window
+relative coordinates when the key was pressed.  When a new window is created, no
+special callback is initially registered and special key strokes in the
+window are ignored.  Passing {\tt NULL} to {\tt glutSpecialFunc}
+disables the generation of special callbacks.
+
+An implementation should do its best to provide ways to generate all
+the {\tt GLUT\_KEY\_}* special keys.  The available {\tt GLUT\_KEY\_}*
+values are:
+\begin{description}
+\itemsep 0in
+\item[\tt GLUT\_KEY\_F1]  F1 function key.
+\item[\tt GLUT\_KEY\_F2]  F2 function key.
+\item[\tt GLUT\_KEY\_F3]  F3 function key.
+\item[\tt GLUT\_KEY\_F4]  F4 function key.
+\item[\tt GLUT\_KEY\_F5]  F5 function key.
+\item[\tt GLUT\_KEY\_F6]  F6 function key.
+\item[\tt GLUT\_KEY\_F7]  F7 function key.
+\item[\tt GLUT\_KEY\_F8]  F8 function key.
+\item[\tt GLUT\_KEY\_F9]  F9 function key.
+\item[\tt GLUT\_KEY\_F10]  F10 function key.
+\item[\tt GLUT\_KEY\_F11]  F11 function key.
+\item[\tt GLUT\_KEY\_F12]  F12 function key.
+\item[\tt GLUT\_KEY\_LEFT]  Left directional key.
+\item[\tt GLUT\_KEY\_UP]  Up directional key.
+\item[\tt GLUT\_KEY\_RIGHT]  Right directional key.
+\item[\tt GLUT\_KEY\_DOWN]  Down directional key.
+\item[\tt GLUT\_KEY\_PAGE\_UP]  Page up directional key.
+\item[\tt GLUT\_KEY\_PAGE\_DOWN]  Page down directional key.
+\item[\tt GLUT\_KEY\_HOME]  Home directional key.
+\item[\tt GLUT\_KEY\_END]  End directional key.
+\item[\tt GLUT\_KEY\_INSERT] Inset directional key.
+\end{description}
+Note:  the delete key is generated as an ASCII character.
+
+\subsection{glutSpaceballMotionFunc}
+
+\rndx{glutSpaceballMotionFunc} sets the Spaceball motion callback for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSpaceballMotionFunc(void (*func)(int x, int y, int z));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSpaceballMotionFunc} sets the Spaceball motion callback for the {\em
+current window}.  The Spaceball motion callback for a window is called when the
+window has Spaceball input focus (normally, when the mouse is in the window)
+and the user generates Spaceball translations.  The {\tt x}, {\tt y}, and {\tt z}
+callback parameters indicate the translations along the X, Y, and Z axes.
+The callback parameters are normalized to be within the range of -1000 to 1000
+inclusive.
+
+Registering a Spaceball motion callback when a Spaceball device is not available
+is ineffectual and not an error.  In this case, no Spaceball motion callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutSpaceballMotionFunc} disables the generation of
+Spaceball motion callbacks.  When a new window is created, no
+Spaceball motion callback is initially registered.
+
+\subsection{glutSpaceballRotateFunc}
+
+\rndx{glutSpaceballRotateFunc} sets the Spaceball rotation callback
+for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSpaceballRotateFunc(void (*func)(int x, int y, int z));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSpaceballRotateFunc} sets the Spaceball rotate callback for the {\em
+current window}.  The Spaceball rotate callback for a window is called when the
+window has Spaceball input focus (normally, when the mouse is in the window)
+and the user generates Spaceball rotations.  The {\tt x}, {\tt y}, and {\tt z}
+callback parameters indicate the rotation along the X, Y, and Z axes.
+The callback parameters are normalized to be within the range of -1800 to 1800
+inclusive.
+
+Registering a Spaceball rotate callback when a Spaceball device is not available
+is ineffectual and not an error.  In this case, no Spaceball rotate callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutSpaceballRotateFunc} disables the generation of
+Spaceball rotate callbacks.  When a new window is created, no
+Spaceball rotate callback is initially registered.
+
+\subsection{glutSpaceballButtonFunc}
+
+\rndx{glutSpaceballButtonFunc} sets the Spaceball button callback for
+the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSpaceballButtonFunc(void (*func)(int button, int state));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSpaceballButtonFunc} sets the Spaceball button callback for the {\em
+current window}.  The Spaceball button callback for a window is called when the
+window has Spaceball input focus (normally, when the mouse is in the window)
+and the user generates Spaceball button presses.  The {\tt button} parameter
+will be the button number (starting at one).  The number of available Spaceball
+buttons can be determined with {\tt glutDeviceGet(GLUT\_NUM\_SPACEBALL\_BUTTONS)}.
+The {\tt state} is either {\tt GLUT\_UP} or {\tt GLUT\_DOWN} indicating whether
+the callback was due to a release or press respectively.
+
+Registering a Spaceball button callback when a Spaceball device is not available
+is ineffectual and not an error.  In this case, no Spaceball button callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutSpaceballButtonFunc} disables the generation of
+Spaceball button callbacks.  When a new window is created, no
+Spaceball button callback is initially registered.
+
+\subsection{glutButtonBoxFunc}
+
+\rndx{glutButtonBoxFunc} sets the dials \& button box button callback for
+the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutButtonBoxFunc(void (*func)(int button, int state));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutButtonBoxFunc} sets the dials \& button box button callback for the {\em
+current window}.  The dials \& button box button callback for a window is called when the
+window has dials \& button box input focus (normally, when the mouse is in the window)
+and the user generates dials \& button box button presses.  The {\tt button} parameter
+will be the button number (starting at one).  The number of available dials \&
+button box
+buttons can be determined with {\tt glutDeviceGet(GLUT\_NUM\_BUTTON\_BOX\_BUTTONS)}.
+The {\tt state} is either {\tt GLUT\_UP} or {\tt GLUT\_DOWN} indicating whether
+the callback was due to a release or press respectively.
+
+Registering a dials \& button box button callback when a dials \& button box
+device is not available
+is ineffectual and not an error.  In this case, no dials \& button box button callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutButtonBoxFunc} disables the generation of
+dials \& button box button callbacks.  When a new window is created, no
+dials \& button box button callback is initially registered.
+
+\subsection{glutDialsFunc}
+
+\rndx{glutDialsFunc} sets the dials \& button box dials callback for
+the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutDialsFunc(void (*func)(int dial, int value));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutDialsFunc} sets the dials \& button box dials callback for the {\em
+current window}.  The dials \& button box dials callback for a window is called when the
+window has dials \& button box input focus (normally, when the mouse is in the window)
+and the user generates dials \& button box dial changes.  The {\tt dial} parameter
+will be the dial number (starting at one).  The number of available dials \&
+button box
+dials can be determined with {\tt glutDeviceGet(GLUT\_NUM\_DIALS)}.
+The {\tt value} measures the absolute rotation in degrees.
+Dial values do not ``roll over'' with each complete rotation but
+continue to accumulate degrees (until the {\tt int} dial value
+overflows).
+
+Registering a dials \& button box dials callback when a dials \& button box
+device is not available
+is ineffectual and not an error.  In this case, no dials \& button box dials callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutDialsFunc} disables the generation of
+dials \& button box dials callbacks.  When a new window is created, no
+dials \& button box dials callback is initially registered.
+
+\subsection{glutTabletMotionFunc}
+
+\rndx{glutTabletMotionFunc} sets the special keyboard callback for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutTabletMotionFunc(void (*func)(int x, int y));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutTabletMotionFunc} sets the tablet motion callback for the {\em
+current window}.  The tablet motion callback for a window is called when the
+window has tablet input focus (normally, when the mouse is in the window)
+and the user generates tablet motion.  The {\tt x} and {\tt y}
+callback parameters indicate the absolute position of the tablet ``puck'' on
+the tablet.
+The callback parameters are normalized to be within the range of 0 to 2000
+inclusive.
+
+Registering a tablet motion callback when a tablet device is not available
+is ineffectual and not an error.  In this case, no tablet motion callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutTabletMotionFunc} disables the generation of
+tablet motion callbacks.  When a new window is created, no
+tablet motion callback is initially registered.
+
+\subsection{glutTabletButtonFunc}
+
+\rndx{glutTabletButtonFunc} sets the special keyboard callback for the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutTabletButtonFunc(void (*func)(int button, int state,
+                          int x, int y));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new entry callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutTabletButtonFunc} sets the tablet button callback for the {\em
+current window}.  The tablet button callback for a window is called when the
+window has tablet input focus (normally, when the mouse is in the window)
+and the user generates tablet button presses.  The {\tt button} parameter
+will be the button number (starting at one).  The number of available tablet
+buttons can be determined with {\tt glutDeviceGet(GLUT\_NUM\_TABLET\_BUTTONS)}.
+The {\tt state} is either {\tt GLUT\_UP} or {\tt GLUT\_DOWN} indicating whether
+the callback was due to a release or press respectively.
+The {\tt x} and {\tt y} callback
+parameters indicate the window relative coordinates when the tablet
+button state changed.
+
+Registering a tablet button callback when a tablet device is not available
+is ineffectual and not an error.  In this case, no tablet button callbacks
+will be generated.
+
+Passing {\tt NULL} to {\tt glutTabletButtonFunc} disables the generation of
+tablet button callbacks.  When a new window is created, no
+tablet button callback is initially registered.
+
+\subsection{glutMenuStateFunc}
+
+\rndx{glutMenuStateFunc} sets the global menu state callback.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutMenuStateFunc(void (*func)(int state));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt func]
+The new menu state callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+\subsubsection*{Description}
+
+{\tt glutMenuStateFunc} sets the global menu state callback so a GLUT
+program can determine when a menu is in use or not.  When a menu state
+callback is registered, it will be called with the value {\tt
+GLUT\_MENU\_IN\_USE} for its {\tt value} parameter when pop-up menus are
+in use by the user; and the callback will be called with the value {\tt
+GLUT\_MENU\_NOT\_IN\_USE} for its {\tt value} parameter when pop-up menus
+are no longer in use.  The {\tt func} parameter names the callback
+function.  Other callbacks continue to operate (except user input
+callbacks) when pop-up menus are in use so the menu state callback
+allows a program to suspend animation or other tasks when menus are in
+use.  The cascading and unmapping of sub-menus from an initial pop-up
+menu does not generate menu state callbacks.  There is
+a single menu state callback for GLUT.
+
+When the menu state callback is called, the {\em current menu} will be
+set to the initial pop-up menu in both the {\tt GLUT\_MENU\_IN\_USE} and
+{\tt GLUT\_MENU\_NOT\_IN\_USE} cases.  The {\em current window} will be
+set to the window from which the initial menu was popped up from,
+also in both cases.
+
+Passing {\tt NULL} to {\tt glutMenuStateFunc}
+disables the generation of the menu state callback.
+
+{\tt glutMenuStateFunc} is a deprecated version of the {\tt glutMenuStatusFunc}
+routine.  The only difference is {\tt glutMenuStateFunc} callback prototype
+does not require the two additional {\tt x} and {\tt y} coordinates.
+
+\subsection{glutIdleFunc}
+
+\rndx{glutIdleFunc} sets the global idle callback.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutIdleFunc(void (*func)(void));
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[{\tt func}]
+The new idle callback function.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutIdleFunc} sets the global idle callback to be {\tt func}
+so a GLUT program
+can perform background processing tasks or continuous animation when
+window system events are not being received.  If enabled, the idle
+callback is continuously called when events are not being
+received.  The callback routine has no parameters.  The {\em current
+window} and {\em current menu} will not be changed before the
+idle callback.  Programs with multiple windows and/or menus should
+explicitly set the {\em current window} and/or {\em current menu}
+and not rely on its current setting.
+
+The amount of computation and rendering done in an idle callback
+should be minimized to avoid affecting the program's interactive
+response.  In general, not more than a single frame of rendering
+should be done in an idle callback.
+
+Passing {\tt NULL} to {\tt glutIdleFunc}
+disables the generation of the idle callback.
+
+\subsection{glutTimerFunc}
+
+\rndx{glutTimerFunc} registers a timer callback to be triggered
+in a specified number of milliseconds.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutTimerFunc(unsigned long msecs,
+                   void (*func)(int value), int value);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[{\tt msecs}]
+Number of milliseconds to pass before calling the callback.
+\item[{\tt func}]
+The timer callback function.
+\item[{\tt value}]
+Integer value to pass to the timer callback.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutTimerFunc} registers the timer callback {\tt func} to be triggered
+in at least {\tt msecs} milliseconds.  The {\tt value} parameter to the timer
+callback will be the value of the {\tt value} parameter to {\tt glutTimerFunc}.
+Multiple timer callbacks at same or differing times may be registered
+simultaneously.
+
+The number of milliseconds is a lower bound on the time before the
+callback is generated.  GLUT attempts to deliver the timer callback
+as soon as possible after the expiration of the callback's time interval.
+
+There is no support for canceling a registered callback.  Instead,
+ignore a callback based on its {\tt value} parameter when it is triggered.
+
+\section{Color Index Colormap Management}
+
+OpenGL supports both RGBA and color index rendering.  The RGBA mode is generally
+preferable to color index because more OpenGL rendering capabilities are
+available and color index mode requires the hand loading of colormaps.
+
+The GLUT color index routines are used to write and read entries in a window's
+color index colormap.  Every GLUT color index window has its own logical color
+index colormap.  The size of a window's colormap can be determined by calling
+{\tt glutGet(GLUT\_WINDOW\_COLORMAP\_SIZE)}.
+
+GLUT color index windows within a program can attempt to share colormap resources
+by copying a single color index colormap to multiple windows using {\tt glutCopyColormap}.
+If possible GLUT will attempt to share the actual colormap.  While copying
+colormaps using {\tt glutCopyColormap} can potentially allow sharing of
+physical colormap resources, logically each window has its own colormap.  So
+changing a copied colormap of a window will force the duplication of the colormap.
+For this reason, color index programs should generally load a single color index
+colormap, copy it to all color index windows within the program, and then not
+modify any colormap cells.
+
+Use of multiple colormaps is likely to result in
+colormap installation problems where some windows are
+displayed with an incorrect colormap due to limitations on colormap
+resources.
+
+\subsection{glutSetColor}
+
+\rndx{glutSetColor} sets the color of a colormap entry.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSetColor(int ndx,
+                  GLfloat red, GLfloat green, GLfloat blue);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt ndx]
+Color cell index (starting at zero).
+\item[\tt red]
+Red intensity (clamped between 0.0 and 1.0 inclusive).
+\item[\tt green]
+Green intensity (clamped between 0.0 and 1.0 inclusive).
+\item[\tt blue]
+Blue intensity (clamped between 0.0 and 1.0 inclusive).
+\end{description}
+
+\subsubsection*{Description}
+
+Sets the {\tt ndx} color index colormap entry of the {\em current window}'s logical
+colormap with the color specified by {\tt red}, {\tt green}, and {\tt blue}.
+The {\em current window} should be a color index window.
+{\tt ndx} should be zero or greater and less than the total number of colormap entries
+for the window.
+If the {\em current window}'s colormap was copied by reference,
+a {\tt glutSetColor} call will force the duplication of the colormap.
+
+\subsection{glutGetColor}
+
+\rndx{glutGetColor} retrieves a red, green, or blue component for a given
+color index colormap entry for the {\em current window}'s logical colormap.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+GLfloat glutGetColor(int ndx, int component);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt ndx]
+Color cell index (starting at zero).
+\item[\tt component]
+One of {\tt GLUT\_RED}, {\tt GLUT\_GREEN}, or {\tt GLUT\_BLUE}.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutGetColor} retrieves a red, green, or blue component for a given
+color index colormap entry for the {\em current window}'s logical colormap.
+The {\em current window} should be a color index window.
+{\tt ndx} should be zero or greater and less than the total number of colormap entries
+for the window.
+For valid color indices, the value returned is a floating point value between 0.0
+and 1.0 inclusive.  {\tt glutGetColor} will return -1.0 if the color
+index specified is less than zero or greater or equal to the value returned
+by {\tt glutGet(GLUT\_WINDOW\_COLORMAP\_SIZE)}, that is if the color index
+is outside the valid range of color indices.
+
+\subsection{glutCopyColormap}
+
+\rndx{glutCopyColormap} copies the logical
+colormap from a specified window to the {\em current window}.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutCopyColormap(int win);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt win]
+The identifier of the window to copy the logical colormap from.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutCopyColormap} copies (lazily if possible to promote sharing) the logical
+colormap from a specified window to the {\em current window}.  Once a colormap has been
+copied, avoid setting cells in the colormap with {\tt glutSetColor} since that
+will force an actual copy of the colormap if it was previously copied by reference.
+{\tt glutCopyColormap} should only be called when both the {\em current window} and
+the {\tt win} window are color index windows.
+
+\section{State Retrieval}
+
+GLUT maintains a considerable amount of programmer visible state.
+Some (but not all) of this state may be directly retrieved.
+Two GLUT state retrieval routines return this state.
+A third GLUT routine helps to easily determine what OpenGL extensions are
+supported by the underlying OpenGL implementation.
+
+\subsection{glutGet}
+
+\rndx{glutGet} retrieves simple GLUT state represented by integers.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+int glutGet(GLenum state);
+\end{verbatim}
+\begin{description}
+\item[\tt state]  Name of state to retrieve.
+\itemsep 0in
+\end{description}
+
+\begin{description}
+\itemsep 0in
+\item[\tt GLUT\_WINDOW\_X]
+X location in pixels (relative to the screen origin for top-level windows, or parent window for subwindows) of the {\em current window}.
+\item[\tt GLUT\_WINDOW\_Y]
+Y location in pixels (relative to the screen origin for top-level windows, or parent window for 
+subwindows) of the {\em current window}.
+\item[\tt GLUT\_WINDOW\_WIDTH]
+Width in pixels of the {\em current window}.
+\item[\tt GLUT\_WINDOW\_HEIGHT]
+Height in pixels of the {\em current window}.
+\item[\tt GLUT\_WINDOW\_BUFFER\_SIZE]
+Total number of bits for {\em current window}'s color buffer.
+For an RGBA window, this is the sum of {\tt \tt GLUT\_WINDOW\_RED\_SIZE},
+{\tt GLUT\_WINDOW\_GREEN\_SIZE}, {\tt GLUT\_WINDOW\_BLUE\_SIZE},
+and {\tt GLUT\_WINDOW\_ALPHA\_SIZE}.  For color index windows, this
+is the size of the color indexes.
+\item[\tt GLUT\_WINDOW\_STENCIL\_SIZE]
+Number of bits in the {\em current window}'s stencil buffer.
+\item[\tt GLUT\_WINDOW\_DEPTH\_SIZE]
+Number of bits in the {\em current window}'s depth buffer.
+\item[\tt GLUT\_WINDOW\_RED\_SIZE]
+Number of bits of red stored the {\em current window}'s color buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_GREEN\_SIZE]
+Number of bits of green stored the {\em current window}'s color buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_BLUE\_SIZE]
+Number of bits of blue stored the {\em current window}'s color buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_ALPHA\_SIZE]
+Number of bits of alpha stored the {\em current window}'s color buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_ACCUM\_RED\_SIZE]
+Number of bits of red stored in the {\em current window}'s accumulation buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_ACCUM\_GREEN\_SIZE]
+Number of bits of green stored in the {\em current window}'s accumulation buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_ACCUM\_BLUE\_SIZE]
+Number of bits of blue stored in the {\em current window}'s accumulation buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_ACCUM\_ALPHA\_SIZE]
+Number of bits of alpha stored in the {\em current window}'s accumulation buffer.
+Zero if the window is color index.
+\item[\tt GLUT\_WINDOW\_DOUBLEBUFFER]
+One if the {\em current window} is double buffered, zero otherwise.
+\item[\tt GLUT\_WINDOW\_RGBA]
+One if the {\em current window} is RGBA mode, zero otherwise (i.e., color index).
+\item[\tt GLUT\_WINDOW\_PARENT]
+The window number of the {\em current window}'s parent; zero if the window is a top-level window.
+\item[\tt GLUT\_WINDOW\_NUM\_CHILDREN]
+The number of subwindows the {\em current window} has (not counting children of children).
+\item[\tt GLUT\_WINDOW\_COLORMAP\_SIZE]
+Size of {\em current window}'s color index colormap; zero for RGBA color model windows.
+\item[\tt GLUT\_WINDOW\_NUM\_SAMPLES]
+Number of samples for multisampling for the {\em current window}.
+\item[\tt GLUT\_WINDOW\_STEREO]
+One if the {\em current window} is stereo, zero otherwise.
+\item[\tt GLUT\_SCREEN\_WIDTH]
+Width of the screen in pixels.
+Zero indicates the width is unknown or not available.
+\item[\tt GLUT\_SCREEN\_HEIGHT]
+Height of the screen in pixels.
+Zero indicates the height is unknown or not available.
+\item[\tt GLUT\_SCREEN\_WIDTH\_MM]
+Width of the screen in millimeters.
+Zero indicates the width is unknown or not available.
+\item[\tt GLUT\_SCREEN\_HEIGHT\_MM]
+Height of the screen in millimeters.
+Zero indicates the height is unknown or not available.
+\item[\tt GLUT\_MENU\_NUM\_ITEMS]
+Number of menu items in the {\em current menu}.
+\item[\tt GLUT\_DISPLAY\_MODE\_POSSIBLE]
+Whether the {\em current display mode} is supported or not.
+\item[\tt GLUT\_INIT\_DISPLAY\_MODE]
+The {\em initial display mode} bit mask.
+\item[\tt GLUT\_INIT\_WINDOW\_X]
+The X value of the {\em initial window position}.
+\item[\tt GLUT\_INIT\_WINDOW\_Y]
+The Y value of the {\em initial window position}.
+\item[\tt GLUT\_INIT\_WINDOW\_WIDTH]
+The width value of the {\em initial window size}.
+\item[\tt GLUT\_INIT\_WINDOW\_HEIGHT]
+The height value of the {\em initial window size}.
+\item[\tt GLUT\_ELAPSED\_TIME]
+Number of milliseconds since {\tt glutInit} called (or first call
+to {\tt glutGet(GLUT\_ELAPSED\_TIME)}).
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutGet} retrieves simple GLUT state represented by integers.
+The {\tt state} parameter determines what type of state to
+return.  GLUT state names beginning with {\tt GLUT\_WINDOW\_}
+return state for the {\em current window}.  GLUT state names beginning
+with {\tt GLUT\_MENU\_} return state for the {\em current menu}.
+Other GLUT state names return global state.
+Requesting state for an invalid GLUT state name returns negative one.
+
+\subsection{glutDeviceGet}
+
+\rndx{glutDeviceGet} retrieves GLUT device information represented by integers.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+int glutDeviceGet(GLenum info);
+\end{verbatim}
+\begin{description}
+\item[\tt info]  Name of device information to retrieve.
+\itemsep 0in
+\end{description}
+
+\begin{description}
+\itemsep 0in
+\item[\tt GLUT\_HAS\_KEYBOARD]
+Non-zero if a keyboard is available; zero if not available.  For most GLUT implementations,
+a keyboard can be assumed.
+\item[\tt GLUT\_HAS\_MOUSE]
+Non-zero if a mouse is available; zero if not available.  For most GLUT implementations,
+a keyboard can be assumed.
+\item[\tt GLUT\_HAS\_SPACEBALL]
+Non-zero if a Spaceball is available; zero if not available.
+\item[\tt GLUT\_HAS\_DIAL\_AND\_BUTTON\_BOX]
+Non-zero if a dial \& button box is available; zero if not available.
+\item[\tt GLUT\_HAS\_TABLET]
+Non-zero if a tablet is available; zero if not available.
+\item[\tt GLUT\_NUM\_MOUSE\_BUTTONS]
+Number of buttons supported by the mouse.  If no mouse is supported, zero
+is returned.
+\item[\tt GLUT\_NUM\_SPACEBALL\_BUTTONS]
+Number of buttons supported by the Spaceball.  If no Spaceball is supported,
+zero is returned.
+\item[\tt GLUT\_NUM\_BUTTON\_BOX\_BUTTONS]
+Number of buttons supported by the dials \& button box device.  If no dials
+\& button box device is supported, zero is returned.
+\item[\tt GLUT\_NUM\_DIALS]
+Number of dials supported by the dials \& button box device.  If no dials
+\& button box device is supported, zero is returned.
+\item[\tt GLUT\_NUM\_TABLET\_BUTTONS]
+Number of buttons supported by the tablet.  If no tablet is supported,
+zero is returned.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutDeviceGet} retrieves GLUT device information represented by integers.
+The {\t info} parameter determines what type of device information to return.
+Requesting device information for an invalid GLUT device information name
+returns negative one.
+
+\subsection{glutExtensionSupported}
+
+\rndx{glutExtensionSupported} helps to easily determine whether a given
+OpenGL extension is supported.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+int glutExtensionSupported(char *extension);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt extension]
+Name of OpenGL extension.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutExtensionSupported} helps to easily determine whether a given
+OpenGL extension is supported or not.  The {\tt extension} parameter
+names the extension to query.  The supported extensions can also be
+determined with {\tt glGetString(GL\_EXTENSIONS)}, but {\tt glutExtensionSupported}
+does the correct parsing of the returned string.
+
+{\tt glutExtensionSupported} returns non-zero if the extension is supported,
+zero if not supported.
+
+There must be a valid {\em current window} to call {\tt glutExtensionSupported}.
+
+{\tt glutExtensionSupported} only returns information about OpenGL
+extensions only.  This means window system dependent extensions (for
+example, GLX extensions) are not reported by {\tt
+glutExtensionSupported}.
+
+\section{Font Rendering}
+
+GLUT supports two type of font rendering:  stroke fonts,
+meaning each glyph is generated as geometry
+composed of lines; and bitmap fonts, where each character
+is a bitmap generated with {\tt glBitmap}.  Stroke fonts have
+the advantage that because they are geometry, they can
+be arbitrarily scale and rendered.  Bitmap fonts are
+less flexible since they are rendered as bitmaps but are
+usually faster than stroke fonts.
+
+\subsection{glutBitmapCharacter}
+
+\rndx{glutBitmapCharacter} renders a bitmap character using OpenGL.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutBitmapCharacter(void *font, int character);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt font]
+Bitmap font to use.
+\item[\tt character]
+Character to render (not confined to 8 bits).
+\end{description}
+
+\subsubsection*{Description}
+
+Without using any display lists, {\tt glutBitmapCharacter} renders the {\tt character}
+in the named bitmap {\tt font}.  The available fonts are:
+\begin{description}
+\item[{\tt GLUT\_BITMAP\_8\_BY\_13}]
+A fixed width font with every character fitting in an 8 by 13 pixel
+rectangle.  The exact bitmaps to be used is defined by the standard X glyph
+bitmaps for the X font named:
+
+{\tt -misc-fixed-medium-r-normal--13-120-75-75-C-80-iso8859-1}
+
+\item[{\tt GLUT\_BITMAP\_9\_BY\_15}]
+A fixed width font with every character fitting in an 9 by 15 pixel
+rectangle.  The exact bitmaps to be used is defined by the standard X glyph
+bitmaps for the X font named:
+
+{\tt -misc-fixed-medium-r-normal--15-140-75-75-C-90-iso8859-1}
+
+\item[{\tt GLUT\_BITMAP\_TIMES\_ROMAN\_10}]
+A 10-point proportional spaced
+Times Roman font.  The exact bitmaps to be used is defined by the
+standard X glyph bitmaps for the X font named:
+
+{\tt -adobe-times-medium-r-normal--10-100-75-75-p-54-iso8859-1}
+
+\item[{\tt GLUT\_BITMAP\_TIMES\_ROMAN\_24}]
+A 24-point proportional spaced
+Times Roman font.  The exact bitmaps to be used is defined by the
+standard X glyph bitmaps for the X font named:
+
+{\tt -adobe-times-medium-r-normal--24-240-75-75-p-124-iso8859-1}
+
+\end{description}
+Rendering a nonexistent character has no effect.  {\tt glutBitmapCharacter} automatically
+sets the OpenGL unpack pixel storage modes it needs appropriately and saves and restores
+the previous modes before returning.  The generated call to {\tt glBitmap} will
+adjust the current raster position based on the width of the character.
+
+\subsection{glutStrokeCharacter}
+
+\rndx{glutStrokeCharacter} renders a stroke character using OpenGL.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutStrokeCharacter(void *font, int character);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt font]
+Stroke font to use.
+\item[\tt character]
+Character to render (not confined to 8 bits).
+\end{description}
+
+\subsubsection*{Description}
+
+Without using any display lists, {\tt glutStrokeCharacter} renders the {\tt character}
+in the named stroke {\tt font}.  The available fonts are:
+\begin{description}
+\item[{\tt GLUT\_STROKE\_ROMAN}]
+A proportionally spaced Roman Simplex font
+for ASCII characters 32 through 127.  The maximum top character in the font
+is 119.05 units; the bottom descends 33.33 units.
+
+\item[{\tt GLUT\_STROKE\_MONO\_ROMAN}]
+A mono-spaced spaced Roman Simplex font (same characters as {\tt GLUT\_STROKE\_ROMAN})
+for ASCII characters 32 through 127.  The maximum top character in the font
+is 119.05 units; the bottom descends 33.33 units.  Each character is 104.76
+units wide.
+\end{description}
+
+Rendering a nonexistent character has no effect.  A {\tt glTranslatef} is used
+to translate the current model view matrix to advance the width of the
+character.
+
+\section{Geometric Shape Rendering}
+
+GLUT includes a number of routines for generating easily recognizable geometric
+shapes.  These routines reflect functionality available in the {\tt aux} toolkit
+and are included in GLUT to allow the construction of simple GLUT programs that
+render recognizable objects.  These routines can be implemented as pure OpenGL
+rendering routines.
+The routines do {\em not} generate display lists for the objects they create.
+
+The routines generate normals appropriate for lighting but do not generate
+texture coordinates (except for the teapot).
+
+\subsection{glutSolidSphere, glutWireSphere}
+
+\rndx{glutSolidSphere} and \rndx{glutWireSphere} render a solid or wireframe
+sphere respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidSphere(GLdouble radius,
+                     GLint slices, GLint stacks);
+void glutWireSphere(GLdouble radius,
+                    GLint slices, GLint stacks);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt radius]
+The radius of the sphere.
+\item[\tt slices]
+The number of subdivisions around the Z axis (similar to lines of longitude).
+\item[\tt stacks]
+The number of subdivisions along the Z axis (similar to lines of latitude).
+\end{description}
+
+\subsubsection*{Description}
+
+Renders a sphere centered at the modeling coordinates origin of the specified {\tt radius}.
+The sphere is subdivided around the Z axis into slices and along the Z
+axis into stacks.
+
+\subsection{glutSolidCube, glutWireCube}
+
+\rndx{glutSolidCube} and \rndx{glutWireCube} render a solid or wireframe
+cube respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidCube(GLdouble size);
+void glutWireCube(GLdouble size);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[{\tt size}]
+Length of each edge.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSolidCube} and {\tt glutWireCube} render a solid or wireframe
+cube respectively.
+The cube is centered at the modeling coordinates origin with sides of length {\tt size}.
+
+\subsection{glutSolidCone, glutWireCone}
+
+\rndx{glutSolidCone} and \rndx{glutWireCone} render a solid or wireframe
+cone respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidCone(GLdouble base, GLdouble height,
+                   GLint slices, GLint stacks);
+void glutWireCone(GLdouble base, GLdouble height,
+                  GLint slices, GLint stacks);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt base]
+The radius of the base of the cone.
+\item[\tt height]
+The height of the cone.
+\item[\tt slices]
+The number of subdivisions around the Z axis.
+\item[\tt stacks]
+The number of subdivisions along the Z axis.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSolidCone} and {\tt glutWireCone} render a solid or wireframe
+cone respectively oriented along the Z axis.  The base of the cone
+is placed at Z = 0, and the top at Z = {\tt height}.  The cone is subdivided
+around the Z axis into slices, and along the Z axis into stacks.
+
+\subsection{glutSolidTorus, glutWireTorus}
+
+\rndx{glutSolidTorus} and \rndx{glutWireTorus} render a solid or wireframe
+torus (doughnut) respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidTorus(GLdouble innerRadius,
+                    GLdouble outerRadius,
+                    GLint nsides, GLint rings);
+void glutWireTorus(GLdouble innerRadius,
+                   GLdouble outerRadius,
+                   GLint nsides, GLint rings);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt innerRadius]
+Inner radius of the torus.
+\item[\tt outerRadius]
+Outer radius of the torus.
+\item[\tt nsides]
+Number of sides for each radial section.
+\item[\tt rings]
+Number of radial divisions for the torus.
+\end{description}
+
+\subsubsection*{Description}
+
+{\tt glutSolidTorus} and {\tt glutWireTorus} render a solid or wireframe
+torus (doughnut) respectively centered at the modeling coordinates origin whose axis is aligned
+with the Z axis.
+
+\subsection{glutSolidDodecahedron, glutWireDodecahedron}
+
+\rndx{glutSolidDodecahedron} and \rndx{glutWireDodecahedron} render a solid or wireframe
+dodecahedron (12-sided regular solid) respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidDodecahedron(void);
+void glutWireDodecahedron(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+{\tt glutSolidDodecahedron} and {\tt glutWireDodecahedron} render a solid or wireframe
+dodecahedron respectively centered at the modeling coordinates origin with a radius of $\sqrt{3}$.
+
+\subsection{glutSolidOctahedron, glutWireOctahedron}
+
+\rndx{glutSolidOctahedron} and \rndx{glutWireOctahedron} render a solid or
+wireframe octahedron (8-sided regular solid) respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidOctahedron(void);
+void glutWireOctahedron(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+{\tt glutSolidOctahedron} and {\tt glutWireOctahedron} render a solid or
+wireframe octahedron respectively centered at the modeling coordinates origin with a radius of 1.0.
+
+\subsection{glutSolidTetrahedron, glutWireTetrahedron}
+
+\rndx{glutSolidTetrahedron} and \rndx{glutWireTetrahedron} render a solid or wireframe
+tetrahedron (4-sided regular solid) respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidTetrahedron(void);
+void glutWireTetrahedron(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+{\tt glutSolidTetrahedron} and {\tt glutWireTetrahedron} render a solid or wireframe
+tetrahedron respectively centered at the modeling coordinates origin with a radius of $\sqrt{3}$.
+
+\subsection{glutSolidIcosahedron, glutWireIcosahedron}
+
+\rndx{glutSolidIcosahedron} and \rndx{glutWireIcosahedron} render a solid or wireframe
+icosahedron (20-sided regular solid) respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidIcosahedron(void);
+void glutWireIcosahedron(void);
+\end{verbatim}
+
+\subsubsection*{Description}
+
+
+{\tt glutSolidIcosahedron} and {\tt glutWireIcosahedron} render a solid or wireframe
+icosahedron respectively.  The icosahedron is centered at the modeling coordinates origin and has a radius
+of 1.0.
+
+\subsection{glutSolidTeapot, glutWireTeapot}
+
+\rndx{glutSolidTeapot} and \rndx{glutWireTeapot} render a solid or wireframe
+teapot respectively.
+
+\subsubsection*{Usage}
+\begin{verbatim}
+void glutSolidTeapot(GLdouble size);
+void glutWireTeapot(GLdouble size);
+\end{verbatim}
+\begin{description}
+\itemsep 0in
+\item[\tt size] Relative size of the teapot.
+\end{description}
+

@@ -1,0 +1,71 @@
+
+TOP = ../..
+
+RM = -rm -rf
+CFLAGS = -g -MDupdate Makedepend -fullwarn
+DETAB = pr -e -t
+
+default all : glutspec.ps spec2.ps spec3.ps spec4.ps
+
+glut.h.notab : $(TOP)/include/GL/glut.h
+	$(DETAB) $(TOP)/include/GL/glut.h > $@
+
+fglut.h.notab : $(TOP)/include/GL/fglut.h
+	$(DETAB) $(TOP)/include/GL/fglut.h > $@
+
+glutspec.dvi : glutspec.tex glut.h.notab fglut.h.notab
+	latex glutspec.tex
+	grep -v subsubsection glutspec.toc > glutspec.toc.fixed
+	mv glutspec.toc.fixed glutspec.toc
+	latex glutspec.tex
+
+spec2.ind :
+	touch spec2.ind
+
+spec3.ind :
+	touch spec3.ind
+
+spec4.ind :
+	touch spec4.ind
+
+spec2.dvi : spec2.tex glut.h.notab fglut.h.notab glutapi.tex spec2.ind
+	latex spec2.tex
+	makeindex spec2
+	grep -v subsubsection spec2.toc > spec2.toc.fixed
+	mv spec2.toc.fixed spec2.toc
+	latex spec2.tex
+
+spec3.dvi : spec3.tex glut.h.notab fglut.h.notab glutapi3.tex spec3.ind glut_state3.tex
+	latex spec3.tex
+	makeindex spec3
+	grep -v subsubsection spec3.toc > spec3.toc.fixed
+	mv spec3.toc.fixed spec3.toc
+	latex spec3.tex
+
+spec4.dvi : spec4.tex glut.h.notab fglut.h.notab glutapi4.tex spec4.ind glut_state4.tex
+	latex spec4.tex
+	makeindex spec4
+	grep -v subsubsection spec4.toc > spec4.toc.fixed
+	mv spec4.toc.fixed spec4.toc
+	latex spec4.tex
+
+glutspec.ps : glutspec.dvi
+	dvips glutspec.dvi -o $@
+
+spec2.ps : spec2.dvi
+	dvips spec2.dvi -o $@
+
+spec3.ps : spec3.dvi
+	dvips spec3.dvi -o $@
+
+spec4.ps : spec4.dvi
+	dvips spec4.dvi -o $@
+
+sinclude Makedepend
+
+clean :
+	$(RM) *.aux *.log *.dvi *.o *.dlog *.idx *.ind *.ilg *.ps *.toc *.notab *.fixed
+	$(RM) core
+
+clobber: clean
+

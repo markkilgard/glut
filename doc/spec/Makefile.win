@@ -1,0 +1,22 @@
+# Makefile for Win32
+
+TOP  = ../..
+
+DETAB = pr -t -e
+
+spec3.ps: spec3.dvi
+	dvips -o $@ spec3.dvi
+
+spec3.dvi: spec3.tex glut.h.notab fglut.h.notab spec3.ind
+	latex spec3.tex
+	makeindex spec3
+	latex spec3.tex
+
+glut.h.notab: ../../include/GL/glut.h
+	$(DETAB) < ../../include/GL/glut.h > $@
+
+fglut.h.notab: ../../include/GL/fglut.h
+	$(DETAB) < ../../include/GL/fglut.h > $@
+
+spec3.ind:
+	touch $@

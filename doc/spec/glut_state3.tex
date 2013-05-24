@@ -1,0 +1,351 @@
+
+This appendix specifies precisely what programmer visible state GLUT
+maintains.  There are three categories of programmer visible state that
+GLUT maintains:  global, window, and menu.  The window and menu state
+categories are maintained for each created window or menu.  
+Additional overlay-related window state is maintained when an overlay
+is established for a window for the lifetime of the overlay.
+
+The tables below name each element of state, define its type, specify
+what GLUT API entry points set or change the state (if possible),
+specify what GLUT API entry point or \rndx{glutGet},
+\rndx{glutDeviceGet}, or \rndx{glutLayerGet} state constant is used to
+get the state (if possible), and how the state is initially set.  For
+details of how any API entry point operates on the specified state, see
+the routine's official description.  Footnotes for each category of
+state indicate additional caveats to the element of state.
+
+\subsection{Types of State}
+
+These types are used to specify GLUT's programmer visible state:
+\begin{description}
+
+\item[Bitmask]
+A group of boolean bits.
+
+\item[Boolean]
+True or false.
+
+\item[Callback]
+A handle to a user-supplied routine invoked when the given callback is triggered
+(or {\tt NULL} which is the default callback).
+
+\item[ColorCell]
+Red, green, and blue color component triple, an array of which makes
+a colormap.
+
+\item[Cursor]
+A GLUT cursor name.
+
+\item[Integer]
+An integer value.
+
+\item[Layer]
+Either normal plane or overlay.
+
+\item[MenuItem]
+Either a menu entry or a submenu trigger.  Both subtypes contain
+of a {\em String} name.  A menu entry has an {\em Integer} value.  A
+submenu cascade has an {\em Integer} menu name naming its associated submenu.
+
+\item[MenuState]
+Either in use or not in use.
+
+\item[Stacking]
+An ordering for top-level windows and sub-windows having the same
+parent.  Higher windows obscure lower windows.
+
+\item[State]
+One of shown, hidden, or iconified.
+
+\item[String]
+A string of ASCII characters.
+
+\item[Timer]
+A triple of a timer {\em Callback}, an {\em Integer} callback parameter, and a time
+in milliseconds (that expires in real time).
+
+\end{description}
+
+\subsection{Global State}
+
+There are two types of global state:  program controlled state which can be
+modified directly or indirectly by the program, and fixed system dependent state.
+
+\subsubsection{Program Controlled State}
+
+{\footnotesize
+\begin{tabular}{|l|l|l|l|l|} \hline
+Name & Type & Set/Change & Get & Initial \\ \hline
+currentWindow & Integer & glutSetWindow \takeNote & glutGetWindow & 0 \\
+currentMenu & Integer & glutSetMenu \takeNote & glutGetMenu & 0 \\
+initWindowX & Integer & glutInitWindowPosition & GLUT\_INIT\_WINDOW\_X & -1 \\
+initWindowY & Integer & glutInitWindowPosition & GLUT\_INIT\_WINDOW\_Y & -1 \\
+initWindowWidth & Integer & glutInitWindowSize & GLUT\_INIT\_WINDOW\_WIDTH & 300 \\
+initWindowHeight & Integer & glutInitWindowSize & GLUT\_INIT\_WINDOW\_HEIGHT & 300 \\
+initDisplayMode & Bitmask & glutInitDisplayMode & GLUT\_INIT\_DISPLAY\_MODE & GLUT\_RGB, \\
+& & & & GLUT\_SINGLE, \\
+& & & & GLUT\_DEPTH \\
+idleCallback & Callback & glutIdleFunc & - & NULL \\
+menuState & MenuState & - & \takeNote & NotInUse \\
+menuStateCallback & Callback & glutMenuEntryFunc & - & NULL \\
+timerList & list of Timer & glutTimerFunc & - & none \\
+\hline
+\end{tabular}
+}
+
+\resetNote
+
+{\footnotesize
+\begin{description}
+\itemsep 0in
+\item[\takeNote] The {\em currentWindow} is also changed implicitly by every window
+or menu
+callback (to the window triggering the callback) and the creation of a window
+(to the window being created).
+\item[\takeNote] The {\em currentMenu} is also changed implicitly by every menu
+callback (to the menu triggering the callback) and the creation of a menu
+(to the menu being created).
+\item[\takeNote] The menu state callback is triggered when the menuState
+changes.
+\end{description}
+}
+
+\subsubsection{Fixed System Dependent State}
+
+{\footnotesize
+\begin{tabular}{|l|l|l|l|l|} \hline
+Name & Type &  Get \\ \hline
+screenWidth & Integer & GLUT\_SCREEN\_WIDTH \\
+screenHeight & Integer & GLUT\_SCREEN\_HEIGHT \\
+screenWidthMM & Integer & GLUT\_SCREEN\_WIDTH\_MM \\
+screenHeightMM & Integer & GLUT\_SCREEN\_HEIGHT\_MM \\
+hasKeyboard & Boolean & GLUT\_HAS\_KEYBOARD \\
+hasMouse & Boolean & GLUT\_HAS\_MOUSE \\
+hasSpaceball & Boolean & GLUT\_HAS\_SPACEBALL \\
+hasDialAndButtonBox & Boolean & GLUT\_HAS\_DIAL\_AND\_BUTTON\_BOX \\
+hasTablet & Boolean & GLUT\_HAS\_TABLET \\
+numMouseButtons & Integer & GLUT\_NUM\_MOUSE\_BUTTONS \\
+numSpaceballButtons & Integer & GLUT\_NUM\_SPACEBALL\_BUTTONS \\
+numButtonBoxButtons & Integer & GLUT\_NUM\_BUTTON\_BOX\_BUTTONS \\
+numDials & Integer & GLUT\_NUM\_DIALS \\
+numTabletButtons & Integer & GLUT\_NUM\_TABLET\_BUTTONS \\
+\hline
+\end{tabular}
+}
+
+\subsection{Window State}
+
+For the purposes of listing the window state elements, window state is
+classified into three types:  base state, frame buffer capability state,
+and layer state.
+The tags {\em top-level}, {\em sub-win}, and {\em cindex} indicate the
+table entry applies only to top-level windows, subwindows, or color index
+windows respectively.
+
+\subsubsection{Basic State}
+
+\resetNote
+{\footnotesize
+\begin{tabular}{|l|l|l|l|l|} \hline
+Name & Type & Set/Change & Get & Initial \\ \hline
+number & Integer & - & glutGetWindow & {\em top-level:} glutCreateWindow \takeNote \\
+& & & & {\em sub-win:} glutCreateSubWindow \sameNote \\
+x & Integer & glutPositionWindow & GLUT\_WINDOW\_X & {\em top-level:} initWindowX \takeNote \\
+& & & & {\em sub-win:} glutCreateSubWindow \\
+y & Integer & glutPositionWindow & GLUT\_WINDOW\_Y & {\em top-level:} initWindowY \takeNote \\
+& & & & {\em sub-win:} glutCreateSubWindow \\
+width & Integer & glutReshapeWindow & GLUT\_WINDOW\_WIDTH & {\em top-level:} initWindowWidth \takeNote \\
+& & & & {\em sub-win:} glutCreateSubWindow \\
+height & Integer & glutReshapeWindow & GLUT\_WINDOW\_HEIGHT & {\em top-level:} initWindowHeight \takeNote \\
+& & & & {\em sub-win:} glutCreateSubWindow \\
+top-level: fullScreen & Boolean & glutFullScreen & & False \\
+& & glutPositionWindow & & \\
+& & glutReshapeWindow \takeNote & & \\
+cursor & Cursor & glutSetCursor & GLUT\_WINDOW\_CURSOR & GLUT\_CURSOR\_INHERIT \\
+stacking & Stacking & glutPopWindow & - & top \\
+& & glutPushWindow & & \\
+displayState & State \takeNote & glutShowWindow \takeNote & - & shown \\
+& & glutHideWindow & & \\
+& & glutIconifyWindow & & \\
+visibility & Visibility & \takeNote & \takeNote & undefined \\
+redisplay & Boolean & glutPostRedisplay \takeNote & - & False \\
+top-level: windowTitle & String & glutWindowTitle & - & glutCreateWindow \\
+top-level: iconTitle & String & glutIconTitle & - & glutCreateWindow \\
+displayCallback & Callback & glutDisplayFunc & - & NULL \takeNote \\
+reshapeCallback & Callback & glutReshapeFunc & - & NULL \takeNote \\
+keyboardCallback & Callback & glutKeyboardFunc & - & NULL \\
+mouseCallback & Callback & glutMouseFunc & - & NULL \\
+motionCallback & Callback & glutMotionFunc & - & NULL \\
+passiveMotionCallback & Callback & glutPassiveMotionFunc & - & NULL \\
+specialCallback & Callback & glutSpecialFunc & - & NULL \\
+spaceballMotionCallback & Callback & glutSpaceballMotionFunc & - & NULL \\
+spaceballRotateCallback & Callback & glutSpaceballRotateFunc & - & NULL \\
+spaceballButtonCallback & Callback & glutSpaceballButtonFunc & - & NULL \\
+buttonBoxCallback & Callback & glutButtonBoxFunc & - & NULL \\
+dialsCallback & Callback & glutDialsFunc & - & NULL \\
+tabletMotionCallback & Callback & glutTabletMotionFunc & - & NULL \\
+tabletButtonCallback & Callback & glutTabletButtonFunc & - & NULL \\
+visibilityCallback & Callback & glutVisibilityFunc & - & NULL \\
+entryCallback & Callback & glutEntryFunc & - & NULL \\
+{\em cindex:} colormap & array of & glutSetColor & glutGetColor & undefined \\
+& ColorCell & glutCopyColormap & & \\
+windowParent & Integer & - & GLUT\_WINDOW\_PARENT & {\em top-level:} 0 \\
+& & & & {\em sub-win:} \takeNote \\
+numChildren & Integer & glutCreateSubWindow & GLUT\_NUM\_CHILDREN & 0 \\
+& & glutDestroyWindow & & \\
+leftMenu & Integer & glutAttachMenu & - & 0 \\
+& & glutDetachMenu & & \\
+middleMenu & Integer & glutAttachMenu & - & 0 \\
+& & glutDetachMenu & & \\
+rightMenu & Integer & glutAttachMenu & - & 0 \\
+& & glutDetachMenu & & \\
+\hline
+\end{tabular}
+}
+
+\resetNote
+
+{\footnotesize
+\begin{description}
+\itemsep 0in
+\item[\takeNote]  Assigned dynamically from unassigned window numbers greater than zero.
+\item[\takeNote]  If {\em initWindowX} is greater or equal to zero {\em and}
+{\em initWindowY} is greater or equal to zero then {\em initWindowX}, else
+window location left to window system to decide.
+\item[\takeNote]  If {\em initWindowY} is greater or equal to zero {\em and}
+{\em initWindowX} is greater or equal to zero then {\em initWindowY}, else
+window location left to window system to decide.
+\item[\takeNote]  If {\em initWindowWidth} is greater than zero {\em and} {\em initWindowHeight} is greater than zero
+the {\em initWindowWidth}, else
+window size left to window system to decide.
+\item[\takeNote]  If {\em initWindowHeight} is greater than zero {\em and} {\em initWindowWidth} is greater than zero
+then {\em initWindowHeight}, else
+window size left to window system to decide.
+\item[\takeNote]  {\tt glutFullScreen} sets to true; {\tt glutPositionWindow} and
+{\tt glutReshapeWindow} set to false.
+\item[\takeNote]  Subwindows can not be iconified.
+\item[\takeNote]  Window system events can also change the displayState.
+\item[\takeNote]  Visibility of a window can change for window system dependent reason, for
+  example, a new window may occlude the window.  {\tt glutPopWindow} and {\tt glutPushWindow} can
+  affect window visibility as a side effect.
+\item[\takeNote]  The visibility callback set by {\tt glutVisibilityFunc} allows the visibility state to be tracked.
+\item[\takeNote]  The redisplay state can be explicitly enabled by {\tt glutRedisplayFunc} or
+  implicitly in response to normal plane redisplay events from the window system.
+\item[\takeNote]  A window's {\em displayCallback} {\em must} be registered before the first display
+  callback would be triggered (or the program is terminated).
+\item[\takeNote]  Instead of being a no-op as most {\tt NULL} callbacks are, a {\tt NULL} {\em reshapeCallback}
+sets the OpenGL viewport to render into the complete window, i.e., {\tt glViewport(0,0,width, height)}.
+\item[\takeNote]  Determined by {\em currentWindow} at {\tt glutCreateSubWindow} time.
+\end{description}
+}
+
+\subsubsection{Frame Buffer Capability State}
+\label{frame-buffer-state}
+
+\resetNote
+{\footnotesize
+\begin{tabular}{|l|l|l|} \hline
+Name & Type & Get \\ \hline
+Total number of bits in color buffer & Integer & GLUT\_WINDOW\_BUFFER\_SIZE \\
+Number of bits in stencil buffer & Integer & GLUT\_WINDOW\_STENCIL\_SIZE \\
+Number of bits in depth buffer & Integer & GLUT\_WINDOW\_DEPTH\_SIZE \\
+Number of bits of red stored in color buffer & Integer & GLUT\_WINDOW\_RED\_SIZE \\
+Number of bits of green stored in color buffer & Integer & GLUT\_WINDOW\_GREEN\_SIZE \\
+Number of bits of blue stored in color buffer & Integer & GLUT\_WINDOW\_BLUE\_SIZE \\
+Number of bits of alpha stored in color buffer & Integer & GLUT\_WINDOW\_ALPHA\_SIZE \\
+Number of bits of red stored in accumulation buffer & Integer & GLUT\_WINDOW\_ACCUM\_RED\_SIZE \\
+Number of bits of green stored in accumulation buffer & Integer & GLUT\_WINDOW\_ACCUM\_GREEN\_SIZE \\
+Number of bits of blue stored in accumulation buffer & Integer & GLUT\_WINDOW\_ACCUM\_BLUE\_SIZE \\
+Number of bits of alpha stored in accumulation buffer & Integer & GLUT\_WINDOW\_ACCUM\_ALPHA\_SIZE \\
+Color index colormap size & Integer & GLUT\_WINDOW\_COLORMAP\_SIZE \\
+If double buffered & Boolean & GLUT\_WINDOW\_DOUBLEBUFFER \\
+If RGBA color model & Boolean & GLUT\_WINDOW\_RGBA \\
+If stereo & Boolean & GLUT\_WINDOW\_STEREO \\
+Number of samples for multisampling & Integer & GLUT\_WINDOW\_MULTISAMPLE \\
+\hline
+\end{tabular}
+}
+
+A window's (normal plane) frame buffer capability state is derived from
+the global initDisplayMode state at the window's creation.  A window's
+frame buffer capabilities can not be changed.
+
+\subsubsection{Layer State}
+
+\resetNote
+{\footnotesize
+\begin{tabular}{|l|l|l|l|l|} \hline
+Name & Type & Set/Change & Get & Initial \\ \hline
+\resetNote
+hasOverlay & Boolean & glutEstablishOverlay & GLUT\_HAS\_OVERLAY & False \\
+& & glutRemoveOverlay & & \\
+overlayPossible & Boolean & \takeNote & GLUT\_OVERLAY\_POSSIBLE & False \\
+layerInUse & Layer & glutUseLayer \takeNote & GLUT\_LAYER\_IN\_USE & normal plane \\
+{\em cindex:} transparentIndex & Integer & - & GLUT\_TRANSPARENT\_INDEX & \takeNote \\
+overlayRedisplay & Boolean & glutPostOverlayRedisplay \takeNote & - & False \\
+overlayDisplayCallback & Callback & glutOverlayDisplayFunc & - & NULL \\
+overlayDisplayState & State & glutShowOverlay & - & shown \\
+                    &       & glutHideOverlay &   &       \\
+normalDamaged & Boolean & \takeNote & GLUT\_NORMAL\_DAMAGED & False \\
+overlayDamaged & Boolean & \takeNote & GLUT\_OVERLAY\_DAMAGED & False \\
+\hline
+\end{tabular}
+}
+
+\resetNote
+
+{\footnotesize
+\begin{description}
+\itemsep 0in
+\item[\takeNote]  Whether an overlay is possible is based on the {\em initDisplayMode} state {\em
+   and} the frame buffer capability state of the window.
+\item[\takeNote]  The {\em layerInUse} is implicitly set to overlay after {\tt glutEstablishOverlay};
+  likewise, {\tt glutRemoveOverlay} resets the state to normal plane.
+\item[\takeNote]  The {\em transparentIndex} is set when a color index overlay is established.  It
+   cannot be set; it may change if the overlay is re-established.  When no overlay is in use
+   or if the overlay is not color index, the {\em transparentIndex} is -1.
+\item[\takeNote]  The {\em overlayRedisplay} state can be explicitly enabled by {\tt glutPostOverlayRedisplay}
+   or implicitly in response to overlay redisplay events from the window system.
+\item[\takeNote]  Set when the window system reports a region of the window's normal plane
+   is undefined (for example, damaged by another window moving or being initially shown).
+   The specifics of when damage occurs are left to the window system to determine.
+   The window's {\em redisplay} state is always set true when damage occurs.  {\em normalDamaged}
+   is cleared whenever the window's display callback returns.
+\item[\takeNote]  Set when the window system reports a region of the window's overlay plane
+   is undefined (for example, damaged by another window moving or being initially shown).
+   The specifics of when damage occurs are left to the window system to determine.  The
+   damage may occur independent from damage to the window's normal plane.
+   The window's {\em redisplay} state is always set true when damage occurs.  {\em normalDamaged}
+   is cleared whenever the window's display callback returns.
+\end{description}
+}
+
+When an overlay is established, {\em overlay} frame buffer capability state is maintained
+as described in Section \ref{frame-buffer-state}.  The {\em layerInUse} determines
+whether {\tt glutGet} returns normal plane or overlay state when an overlay is
+established.
+
+\subsection{Menu State}
+
+\resetNote
+
+{\footnotesize
+\begin{tabular}{|l|l|l|l|l|} \hline
+Name & Type & Set/Change & Get & Initial \\ \hline
+number & Integer & - & glutSetMenu & {\em top-level:} glutCreateMenu \takeNote \\
+select & Callback & - & - & glutCreateMenu \\
+items & list of MenuItem & - & - & - \\
+numItems & Integer & - & GLUT\_MENU\_NUM\_ITEMS & 0 \\
+\hline
+\end{tabular}
+}
+\resetNote
+
+{\footnotesize
+\begin{description}
+\itemsep 0in
+\item[\takeNote]  Assigned dynamically from unassigned window numbers greater than zero.
+\end{description}
+}
+

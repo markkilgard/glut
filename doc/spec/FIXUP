@@ -1,0 +1,19 @@
+#!/bin/csh -f
+foreach i ( spec3.tex glutapi3.tex )
+  cat $i | tr '()' '@~' | tr '{}' '()' | sed 's/\\subsubsection\*/Subsubsection/g' | sed 's/\\rndx/rndx/g' | sed 's/\\ndx/ndx/g' | grep -v '^\\defndx'  | grep -v '^\\defrndx' | grep -v cleardouble | sed 's/define/DeFiNe/g' | sed 's/include/InClUdE/g' | sed 's/``/```/g' | sed "s/''/'''/g" > $i.tmp
+  cat $i.tmp | nawk -f verbatim.awk > $i.tmp3
+  m4 -Uindex fix.m4 $i.tmp3 > $i.tmp2
+  cat $i.tmp2 | tr '()' '{}' | tr '@~' '()' | sed 's/DeFiNe/define/g' | sed 's/InClUdE/include/g' | grep -v raggedbottom > $i.fixed
+  /bin/rm -rf $i.tmp $i.tmp2 $i.tmp3
+end
+foreach i ( glut_state3.tex )
+  cat $i | tr '()' '@~' | tr '{}' '()' | sed 's/\\rndx/rndx/g' | sed 's/\\ndx/ndx/g' > $i.tmp
+  m4 -Uindex fix.m4 $i.tmp > $i.tmp2
+  cat $i.tmp2 | tr '()' '{}' | tr '@~' '()' > $i.fixed
+  /bin/rm -rf $i.tmp $i.tmp2
+end
+
+foreach i ( *.fixed )
+  echo $i:r
+  cp $i /usr/tmp/glut/$i:r
+end
