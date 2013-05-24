@@ -1,0 +1,59 @@
+
+/* Copyright (c) Mark J. Kilgard, 1998. */
+
+#define DoNormalLib   YES
+#define DoSharedLib   NO
+#define DoDebugLib    NO
+#define DoProfileLib  NO
+
+#define SoRev 3.7
+
+#include <Library.tmpl>
+
+#include "../../Glut.cf"
+
+SRCS = cmap_buildcmap.c cmap_context.c cmap_create.c cmap_destroy.c \
+  cmap_flag.c cmap_get.c cmap_getfunc.c cmap_gettexdim.c \
+  cmap_getvec.c cmap_nearfar.c \
+  cmap_origin.c cmap_render.c cmap_rvec2st.c cmap_set.c cmap_setfunc.c \
+  cmap_setvec.c cmap_texdim.c cmap_texobj.c
+
+OBJS = cmap_buildcmap.o cmap_context.o cmap_create.o cmap_destroy.o \
+  cmap_flag.o cmap_get.o cmap_getfunc.o cmap_gettexdim.o \
+  cmap_getvec.o cmap_nearfar.o \
+  cmap_origin.o cmap_render.o cmap_rvec2st.o cmap_set.o cmap_setfunc.o \
+  cmap_setvec.o cmap_texdim.o cmap_texobj.o
+
+#ifdef LibraryObjectRule
+LibraryObjectRule()
+#else
+/* XXX Very lame, you must be using pre-R5 config files!  This
+   will probably do essentially what LibraryObjectRule does. */
+# if DoNormalLib
+NormalLibraryObjectRule()
+# endif
+# if DoSharedLib
+SharedLibraryObjectRule()
+# endif
+# if DoDebugLib
+DebuggedLibraryObjectRule()
+# endif
+# if DoProfileLib
+ProfiledLibraryObjectRule()
+# endif
+#endif
+
+#if DoNormalLib
+NormalLibraryTarget(glcmap,$(OBJS))
+#endif
+#if DoSharedLib
+SharedLibraryTarget(glcmap,SoRev,$(OBJS),.,.)
+#endif
+#if DoDebugLib
+DebuggedLibraryTarget(glcmap,$(OBJS))
+#endif
+#if DoProfileLib
+ProfiledLibraryTarget(glcmap,$(OBJS))
+#endif
+
+DependTarget()

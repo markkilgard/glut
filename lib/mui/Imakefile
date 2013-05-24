@@ -1,0 +1,53 @@
+
+/* Copyright (c) Mark J. Kilgard, 1994, 1998. */
+
+#define DoNormalLib   YES
+#define DoSharedLib   NO
+#define DoDebugLib    NO
+#define DoProfileLib  NO
+
+#define SoRev 3.7
+
+#include <Library.tmpl>
+
+#include "../../Glut.cf"
+
+SRCS = button.c displaylist.c gizmo.c glutmui.c \
+   hslider.c miscui.c mui.c pulldown.c textlist.c uicolor.c vslider.c
+
+OBJS = button.o displaylist.o gizmo.o glutmui.o \
+   hslider.o miscui.o mui.o pulldown.o textlist.o uicolor.o vslider.o
+
+#ifdef LibraryObjectRule
+LibraryObjectRule()
+#else
+/* XXX Very lame, you must be using pre-R5 config files!  This
+   will probably do essentially what LibraryObjectRule does. */
+# if DoNormalLib
+NormalLibraryObjectRule()
+# endif
+# if DoSharedLib
+SharedLibraryObjectRule()
+# endif
+# if DoDebugLib
+DebuggedLibraryObjectRule()
+# endif
+# if DoProfileLib
+ProfiledLibraryObjectRule()
+# endif
+#endif
+
+#if DoNormalLib
+NormalLibraryTarget(mui,$(OBJS))
+#endif
+#if DoSharedLib
+SharedLibraryTarget(mui,SoRev,$(OBJS),.,.)
+#endif
+#if DoDebugLib
+DebuggedLibraryTarget(mui,$(OBJS))
+#endif
+#if DoProfileLib
+ProfiledLibraryTarget(mui,$(OBJS))
+#endif
+
+DependTarget()

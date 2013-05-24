@@ -1,0 +1,21 @@
+##############################################################################
+# //sw/apps/gpu/drivers/opengl/glut/lib/glut/makefile.nvmk
+#
+# unix-build/nvmake makefile for building libglut.a; based on
+# //sw/apps/gpu/drivers/opengl/glut/lib/glut/GNUmakefile
+##############################################################################
+
+include $(NV_SOURCE)/common/build/nvCommon.nvmk
+
+NV_MODULE_LOGGING_NAME = "apps/glut"
+
+LIBGLUT = $(OUTPUTDIR)/libglut.a
+
+include $(NV_SOURCE)/gpu/drivers/opengl/glut/lib/glut/glut.nvmk
+
+build:: $(LIBGLUT)
+
+$(LIBGLUT): $(OBJECTS)
+	$(call quiet_cmd,AR) cr $@ $(OBJECTS)
+
+include $(NV_SOURCE)/common/build/nvCommonRules.nvmk

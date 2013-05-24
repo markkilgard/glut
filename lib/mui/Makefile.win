@@ -1,0 +1,19 @@
+# Makefile for Win32
+
+TOP = ..\..
+
+!ifdef WOA
+!include "$(TOP)\woa.mak"
+!else
+!include <win32.mak>
+!endif
+
+SRCS = gizmo.c glutmui.c displaylist.c uicolor.c miscui.c mui.c vslider.c textlist.c button.c pulldown.c hslider.c
+OBJS = $(SRCS:.c=.obj)
+
+all	: mui.lib
+
+!include "$(TOP)/glutwin32.mak"
+
+mui.lib	: $(OBJS)
+	$(implib) -out:mui.lib $(OBJS)

@@ -1,0 +1,52 @@
+##
+##  Makefile for Windows NT
+##
+
+ECHO = REM
+
+
+# defines
+SUBDIRS	= glut.dir mui.dir
+CLEAN	= $(SUBDIRS:.dir=.clean)
+CLOBBER	= $(SUBDIRS:.dir=.clobber)
+
+
+# default rule
+default	: $(SUBDIRS)
+
+
+# cleanup rules
+clean	: $(CLEAN)
+clobber	: $(CLOBBER)
+
+test:
+	$(ECHO) Testing in glut subdirectory...
+	@cd glut
+	@nmake -f Makefile.win -nologo test
+	@cd ..
+	$(ECHO) Testing in mui subdirectory...
+	@cd mui
+	@nmake -f Makefile.win -nologo test
+	@cd ..
+
+# inference rules
+$(SUBDIRS)	:
+	$(ECHO) Making in $* subdirectory...
+	@cd $*
+	@nmake -f Makefile.win -nologo
+	@cd ..
+
+$(CLEAN)	:
+	@del *~
+	$(ECHO) Cleaning in $* subdirectory...
+	@cd $*
+	@nmake -f Makefile.win -nologo clean
+	@cd ..
+
+$(CLOBBER)	:
+	$(ECHO) Clobbering in $* subdirectory...
+	@cd $*
+	@nmake -f Makefile.win -nologo clobber
+	@cd ..
+
+

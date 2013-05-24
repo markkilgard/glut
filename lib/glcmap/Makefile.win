@@ -1,0 +1,19 @@
+# Makefile for Win32
+
+TOP = ..\..
+
+!ifdef WOA
+!include "$(TOP)\woa.mak"
+!else
+!include <win32.mak>
+!endif
+
+SRCS = cmap_buildcmap.c cmap_context.c cmap_create.c cmap_destroy.c cmap_flag.c cmap_nearfar.c cmap_rvec2st.c cmap_set.c cmap_setfunc.c cmap_setvec.c cmap_texdim.c cmap_texobj.c cmap_render.c
+OBJS = $(SRCS:.c=.obj)
+
+all	: glcmap.lib
+
+!include "$(TOP)/glutwin32.mak"
+
+glcmap.lib : $(OBJS)
+	$(implib) -out:glcmap.lib $(OBJS)

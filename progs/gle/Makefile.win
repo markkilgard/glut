@@ -1,0 +1,46 @@
+# Makefile for Win32
+
+TOP = ..\..
+
+!ifdef WOA
+!include "$(TOP)\woa.mak"
+!else
+!include <win32.mak>
+!endif
+
+SRCS = beam.c candlestick.c cone.c cylinder.c helix.c helix2.c helix3.c helix4.c helixtex.c horn.c joincone.c joinoffset.c martini.c screw.c taper.c texas.c twoid.c twistoid.c
+
+EXTRALIBS = $(GLE)
+DEPLIBS = $(GLE)
+LDIRT = trackball.c trackball.h joincone.c
+
+!include "$(TOP)/glutwin32.mak"
+
+joincone.obj: cone.obj
+	copy /y cone.obj joincone.obj
+
+trackball.c:
+	copy /y ..\examples\trackball.c trackball.c
+
+trackball.h:
+	copy /y ..\examples\trackball.h trackball.h
+
+# dependencies
+beam.exe	: mainsimple.obj
+cylinder.exe	: mainsimple.obj
+cone.exe	: mainsimple.obj
+helix.exe	: mainsimple.obj
+helix2.exe	: mainsimple.obj
+helix3.exe	: mainsimple.obj
+helix4.exe	: mainsimple.obj
+helixtex.exe	: texture.obj maintex.obj
+horn.exe	: mainsimple.obj
+joincone.exe	: mainjoin.obj
+joinoffset.exe	: mainjoin.obj
+martini.exe	: trackball.obj
+screw.exe	: texture.obj maintex.obj
+taper.exe	: mainsimple.obj
+texas.exe	: mainjoin.obj
+twistoid.exe	: texture.obj maintex.obj
+trackball.obj	: trackball.h
+martini.obj	: trackball.h

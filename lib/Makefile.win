@@ -1,0 +1,42 @@
+##
+##  Makefile for Windows NT
+##
+
+ECHO  = REM
+
+# defines
+SUBDIRS	= glut.dir glut.static_win32.dir mui.dir gle.dir glsmap.dir glcmap.dir
+CLEAN	= $(SUBDIRS:.dir=.clean)
+CLOBBER	= $(SUBDIRS:.dir=.clobber)
+
+
+# default rule
+default	: $(SUBDIRS)
+
+
+# cleanup rules
+clean	: $(CLEAN)
+clobber	: $(CLOBBER)
+
+
+# inference rules
+$(SUBDIRS)	:
+	$(ECHO) Making in $* subdirectory...
+	@cd $*
+	@nmake -f Makefile.win -nologo
+	@cd ..
+
+$(CLEAN)	:
+	@del *~
+	$(ECHO) Cleaning in $* subdirectory...
+	@cd $*
+	@nmake -f Makefile.win -nologo clean
+	@cd ..
+
+$(CLOBBER)	:
+	$(ECHO) Clobbering in $* subdirectory...
+	@cd $*
+	@nmake -f Makefile.win -nologo clobber
+	@cd ..
+
+

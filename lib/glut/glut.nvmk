@@ -1,0 +1,82 @@
+##############################################################################
+# //sw/apps/gpu/drivers/opengl/glut/lib/glut/glut.nvmk
+#
+# unix-build/nvmake makefile fragment for building the glut source files;
+# based on:
+# //sw/apps/gpu/drivers/opengl/glut/lib/glut/GNUmakefile
+##############################################################################
+
+GLUT_SOURCES += glut_bitmap.c
+GLUT_SOURCES += glut_bwidth.c
+GLUT_SOURCES += glut_cindex.c
+GLUT_SOURCES += glut_cmap.c
+GLUT_SOURCES += glut_cursor.c
+GLUT_SOURCES += glut_dials.c
+GLUT_SOURCES += glut_dstr.c
+GLUT_SOURCES += glut_event.c
+GLUT_SOURCES += glut_ext.c
+GLUT_SOURCES += glut_fbc.c
+GLUT_SOURCES += glut_fullscrn.c
+GLUT_SOURCES += glut_gamemode.c
+GLUT_SOURCES += glut_get.c
+GLUT_SOURCES += glut_glxext.c
+GLUT_SOURCES += glut_init.c
+GLUT_SOURCES += glut_input.c
+GLUT_SOURCES += glut_joy.c
+GLUT_SOURCES += glut_key.c
+GLUT_SOURCES += glut_keyctrl.c
+GLUT_SOURCES += glut_keyup.c
+GLUT_SOURCES += glut_menu.c
+GLUT_SOURCES += glut_menu2.c
+GLUT_SOURCES += glut_mesa.c
+GLUT_SOURCES += glut_modifier.c
+GLUT_SOURCES += glut_overlay.c
+GLUT_SOURCES += glut_shapes.c
+GLUT_SOURCES += glut_space.c
+GLUT_SOURCES += glut_stroke.c
+GLUT_SOURCES += glut_swap.c
+GLUT_SOURCES += glut_swidth.c
+GLUT_SOURCES += glut_tablet.c
+GLUT_SOURCES += glut_teapot.c
+GLUT_SOURCES += glut_util.c
+GLUT_SOURCES += glut_vidresize.c
+GLUT_SOURCES += glut_warp.c
+GLUT_SOURCES += glut_win.c
+GLUT_SOURCES += glut_winmisc.c
+GLUT_SOURCES += layerutil.c
+
+GLUT_SOURCES += glut_8x13.c
+GLUT_SOURCES += glut_9x15.c
+GLUT_SOURCES += glut_hel10.c
+GLUT_SOURCES += glut_hel12.c
+GLUT_SOURCES += glut_hel18.c
+GLUT_SOURCES += glut_mroman.c
+GLUT_SOURCES += glut_roman.c
+GLUT_SOURCES += glut_tr10.c
+GLUT_SOURCES += glut_tr24.c
+
+# The below comment is taken from
+# //sw/apps/gpu/drivers/opengl/glut/lib/glut/GNUmakefile:
+#
+# Uncomment the NV_DEFINES line below if you want to build a version of
+# libglut.a that avoids using the SGI "fast atoms" optimization
+# introduced in IRIX 6.3.  This optimization eliminates serveral X server
+# round-trips.  If you are building libglut.a on an IRIX 6.3 or later
+# machine and want a chance (no guarantees) that GLUT executables built
+# against your libglut.a will work on IRIX 6.2 machines, uncomment out
+# the LCDEFS line below.  Otherwise, you'll get a run-time message about
+# "attempted access to unresolvable symbol in XXX: _XSGIFastInternAtom"
+GLUT_DEFINES += NO_FAST_ATOMS
+
+GLUT_DIR = $(NV_SOURCE)/gpu/drivers/opengl/glut
+GLUT_SOURCE_DIR = $(GLUT_DIR)/lib/glut
+
+GLUT_INCLUDES += $(GLUT_DIR)/include
+GLUT_INCLUDES += $(NV_SOURCE)/gpu/drivers/opengl/include
+GLUT_INCLUDES += $(NV_TOOLS)/unix/targets/common/xorg-server/include
+
+$(call BUILD_OBJECT_LIST,$(GLUT_SOURCES)): NV_DEFINES += $(GLUT_DEFINES)
+$(call BUILD_OBJECT_LIST,$(GLUT_SOURCES)): NV_INCLUDES += $(GLUT_INCLUDES)
+
+SOURCES += $(addprefix $(GLUT_SOURCE_DIR)/,$(GLUT_SOURCES))
+

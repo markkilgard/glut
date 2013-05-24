@@ -1,0 +1,7 @@
+#!c:/bin/tcsh -f
+foreach i ( `c:/cygwin/bin/find . -name Makefile.win -print`)
+  echo $i
+  cp -f $i $i:r
+  chmod 444 $i:r
+end
+exit 0

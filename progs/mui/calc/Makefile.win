@@ -1,0 +1,19 @@
+# Makefile for Win32
+
+TOP = ..\..\..
+
+!ifdef WOA
+!include "$(TOP)\woa.mak"
+!else
+!include <win32.mak>
+!endif
+
+SRCS = calc.c
+
+EXTRALIBS = $(MUI)
+DEPLIBS = $(MUI)
+
+!include "$(TOP)/glutwin32.mak"
+
+# dependencies
+calc.obj: calc.h
