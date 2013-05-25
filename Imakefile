@@ -1,0 +1,9 @@
+#define IHaveSubdirs
+#define PassCDebugFlags
+
+#include "./Glut.cf"
+
+SUBDIRS = lib test progs
+
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
