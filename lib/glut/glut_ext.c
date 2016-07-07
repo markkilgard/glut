@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "glutint.h"
 
@@ -39,29 +40,32 @@ glutExtensionSupported(const char *extension)
 
   if (!extensions || (GET_CURRENT_CONTEXT() != cachedContext)) {
     extensions = glGetString(GL_EXTENSIONS);
+    assert(extensions);  /* If this assets, likely no current GL context. */
     cachedContext = GET_CURRENT_CONTEXT();
   }
-  /* It takes a bit of care to be fool-proof about parsing the
-     OpenGL extensions string.  Don't be fooled by sub-strings,
-     etc. */
-  start = extensions;
-  for (;;) {
-    /* If your application crashes in the strstr routine below,
-       you are probably calling glutExtensionSupported without
-       having a current window.  Calling glGetString without
-       a current OpenGL context has unpredictable results.
-       Please fix your program. */
-    where = (const GLubyte *) strstr((const char *) start, extension);
-    if (!where) {
-      break;
-    }
-    terminator = where + strlen(extension);
-    if (where == start || *(where - 1) == ' ') {
-      if (*terminator == ' ' || *terminator == '\0') {
-        return 1;
+  if (extensions) {
+    /* It takes a bit of care to be fool-proof about parsing the
+       OpenGL extensions string.  Don't be fooled by sub-strings,
+       etc. */
+    start = extensions;
+    for (;;) {
+      /* If your application crashes in the strstr routine below,
+         you are probably calling glutExtensionSupported without
+         having a current window.  Calling glGetString without
+         a current OpenGL context has unpredictable results.
+         Please fix your program. */
+      where = (const GLubyte *)strstr((const char *)start, extension);
+      if (!where) {
+        break;
       }
+      terminator = where + strlen(extension);
+      if (where == start || *(where - 1) == ' ') {
+        if (*terminator == ' ' || *terminator == '\0') {
+          return 1;
+        }
+      }
+      start = terminator;
     }
-    start = terminator;
   }
   return 0;
 }

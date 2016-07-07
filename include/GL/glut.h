@@ -114,6 +114,11 @@ typedef unsigned short wchar_t;
 #  pragma warning (disable:4305)  /* VC++ 5.0 version of above warning. */
 # endif
 
+/* Too hard to get the exit annotations correct for exit in recent Visual Studio compilers (2015 on) */
+#  if _MSC_VER >= 1900
+#   include <corecrt.h>
+#  endif
+
 /* Win32 has an annoying issue where there are multiple C run-time
    libraries (CRTs).  If the executable is linked with a different CRT
    from the GLUT DLL, the GLUT DLL will not share the same CRT static
@@ -146,7 +151,7 @@ typedef unsigned short wchar_t;
 #   define _CRTIMP
 #  else
     /* Current definition */
-#   ifdef _DLL
+#   if defined(_DLL) && !defined(GLUT_STATIC_LIB)
 #    define _CRTIMP __declspec(dllimport)
 #   else
 #    define _CRTIMP
@@ -165,7 +170,7 @@ typedef unsigned short wchar_t;
    to keep 64-bit compiler happy. */
 #  define GLUTAPI /*__declspec(dllexport)*/
 # else
-#  ifdef _DLL
+#  if defined(_DLL) && !defined(GLUT_STATIC_LIB)
 #   define GLUTAPI __declspec(dllimport)
 #  else
 #   define GLUTAPI extern
@@ -212,7 +217,11 @@ void __cdecl exit(int __status);
 #      include <CodeAnalysis\sourceannotations.h>
        extern _CRTIMP __declspec(noreturn) void __cdecl exit([SA_Pre(Null=SA_No)] [SA_Pre(Deref=1,Valid=SA_Yes,Access=SA_Read)] int);
 #     else
-       extern _CRTIMP __declspec(noreturn) void   __cdecl exit(int);
+#      if defined(_In_) && defined(_ACRTIMP)  // Visual Studio 2015 defines
+        _ACRTIMP __declspec(noreturn) void   __cdecl exit(_In_ int _Code);
+#      else
+        extern _CRTIMP __declspec(noreturn) void   __cdecl exit(int);
+#      endif
 #     endif
 #    else
       extern _CRTIMP __declspec(noreturn) void   __cdecl exit(int);

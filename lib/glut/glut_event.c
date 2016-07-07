@@ -1142,6 +1142,7 @@ processWindowWorkList(GLUTwindow * window)
           if (workMask & GLUT_FULL_SCREEN_WORK) {
             MotifWmHints hints;
 
+            memset(&hints, 0, sizeof(hints));
             hints.flags = MWM_HINTS_DECORATIONS;
             hints.decorations = 0;  /* Absolutely no
                                        decorations. */
@@ -1166,6 +1167,7 @@ processWindowWorkList(GLUTwindow * window)
                  requesting a fullscreen window. */
               XSizeHints hints;
 
+              memset(&hints, 0, sizeof(hints));
               hints.flags = USPosition | USSize;
               hints.x = 0;
               hints.y = 0;
@@ -1174,7 +1176,13 @@ processWindowWorkList(GLUTwindow * window)
               XSetWMNormalHints(__glutDisplay, window->win, &hints);
             }
           } else {
-            XDeleteProperty(__glutDisplay, window->win, __glutMotifHints);
+            MotifWmHints hints;
+
+            memset(&hints, 0, sizeof(hints));
+            hints.flags = 0;  /* No longer requestion no decorations. */
+            XChangeProperty(__glutDisplay, window->win,
+              __glutMotifHints, __glutMotifHints, 32,
+              PropModeReplace, (unsigned char *) &hints, 4);
             setNetWMFullscreen(window, _NET_WM_STATE_REMOVE);
           }
         }

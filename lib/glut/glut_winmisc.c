@@ -23,13 +23,11 @@ void GLUTAPIENTRY
 glutSetWindowTitle(const char *title)
 {
   XTextProperty textprop;
-  const char **pvalue = (const char**) &textprop.value;  // See below for why...
 
   assert(!__glutCurrentWindow->parent);
   IGNORE_IN_GAME_MODE();
-  *pvalue = title; /* We want to write "textprop.value = (unsigned char *) title;"
-                      but gcc complains about discarding const-ness of pointer */
-  assert(!strcmp((const char*)textprop.value, title));
+  /* Ok that "cast discards `const' from pointer target type" below. */
+  textprop.value = (unsigned char *) title;
   textprop.encoding = XA_STRING;
   textprop.format = 8;
   textprop.nitems = (unsigned long)strlen(title);
@@ -42,13 +40,11 @@ void GLUTAPIENTRY
 glutSetIconTitle(const char *title)
 {
   XTextProperty textprop;
-  const char **pvalue = (const char**) &textprop.value;  // See below for why...
 
   assert(!__glutCurrentWindow->parent);
   IGNORE_IN_GAME_MODE();
-  *pvalue = title; /* We want to write "textprop.value = (unsigned char *) title;"
-                      but gcc complains about discarding const-ness of pointer */
-  assert(!strcmp((const char*)textprop.value, title));
+  /* Ok that "cast discards `const' from pointer target type" below. */
+  textprop.value = (unsigned char *) title;
   textprop.encoding = XA_STRING;
   textprop.format = 8;
   textprop.nitems = (unsigned long)strlen(title);

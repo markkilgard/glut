@@ -737,7 +737,6 @@ glutCreateWindow(const char *title)
 #endif
   Window win;
   XTextProperty textprop;
-  const char **pvalue = (const char**) &textprop.value;  // See below for why...
 
   if (__glutGameModeWindow) {
     __glutFatalError("cannot create windows in game mode.");
@@ -748,9 +747,7 @@ glutCreateWindow(const char *title)
     /* not game mode */ 0);
   win = window->win;
   /* Setup ICCCM properties. */
-  *pvalue = title; /* We want to write "textprop.value = (unsigned char *) title;"
-                      but gcc complains about discarding const-ness of pointer */
-  assert(!strcmp((const char*)textprop.value, title));
+  textprop.value = (unsigned char *) title;
   textprop.encoding = XA_STRING;
   textprop.format = 8;
   textprop.nitems = (unsigned long)strlen(title);
